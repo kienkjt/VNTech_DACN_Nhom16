@@ -8,7 +8,6 @@ public class VnTechApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(VnTechApplication.class, args);
-        System.out.println("Hello");
 	}
 
 

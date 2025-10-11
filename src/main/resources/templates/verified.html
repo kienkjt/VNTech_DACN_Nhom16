@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Xác thực thành công</title>
+</head>
+<body>
+<h2 th:if="${verified}">✅ Tài khoản của bạn đã được xác thực thành công!</h2>
+<h2 th:unless="${verified}">❌ Mã xác thực không hợp lệ hoặc đã hết hạn.</h2>
+<a href="/login">Đăng nhập</a>
+</body>
+</html>

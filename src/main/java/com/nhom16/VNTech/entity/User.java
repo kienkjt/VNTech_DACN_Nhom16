@@ -14,9 +14,9 @@ import java.util.UUID;
 @Table(name = "user")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String name;
+    private String username;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -25,6 +25,9 @@ public class User {
     private String role;
     private String createdAt;
     private Boolean isActive;
+    @Column(nullable = false)
+    private boolean enabled;
 
+    private String verificationToken;
 
 }
