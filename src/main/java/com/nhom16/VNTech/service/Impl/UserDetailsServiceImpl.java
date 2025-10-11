@@ -19,10 +19,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng có email: " + email));
 
         if (!user.isEnabled()) {
-            throw new UsernameNotFoundException("User not verified");
+            throw new UsernameNotFoundException("Người dùng chưa được xác minh");
         }
 
         String role = user.getRole() == null ? "USER" : user.getRole();

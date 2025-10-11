@@ -2,6 +2,7 @@ package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.UserRegistrationDto;
 import com.nhom16.VNTech.service.UserService;
+import com.nhom16.VNTech.service.VerificationTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +13,9 @@ public class RegistrationController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private VerificationTokenService verificationTokenService;
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -26,15 +30,19 @@ public class RegistrationController {
         return "verify-otp";
     }
 
+    @GetMapping("/verify-otp")
+    public String showVerifyOtpPage() {
+        return "verify-otp";
+    }
+
     @PostMapping("/verify-otp")
-    public String verifyOtp(@RequestParam String email, @RequestParam String otp, Model model) {
-        boolean isValid = userService.verifyOtp(email, otp);
-        if (isValid) {
-            model.addAttribute("message", "Tài khoản của bạn đã được xác minh thành công!");
+    public String verifyOtp(@RequestParam("otp") String otp, Model model) {
+        boolean valid = verificationTokenService.validateVerificationToken(otp);
+        if (valid) {
+            model.addAttribute("message", "Tài khoản của bạn đã được kích hoạt thành công!");
             return "verified";
         } else {
-            model.addAttribute("error", "Mã OTP không hợp lệ hoặc đã hết hạn.");
-            model.addAttribute("email", email);
+            model.addAttribute("message", "Mã OTP không hợp lệ hoặc đã hết hạn!");
             return "verify-otp";
         }
     }
