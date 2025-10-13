@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("Người dùng chưa được xác minh");
         }
 
-        String role = user.getRole() == null ? "USER" : user.getRole();
+        String role = (user.getRole() == null) ? "USER" : user.getRole().getRoleName();
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
 
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);

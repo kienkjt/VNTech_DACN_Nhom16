@@ -21,7 +21,7 @@ public class VerificationTokenService {
         tokenRepository.deleteByUserId(user.getId());
 
         String otp = String.format("%06d", new Random().nextInt(999999));
-        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(5);
+        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(2);
 
         VerificationToken token = new VerificationToken(otp, user, expiryDate);
         tokenRepository.save(token);

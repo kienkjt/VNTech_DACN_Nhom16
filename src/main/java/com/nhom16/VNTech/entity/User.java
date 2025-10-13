@@ -14,19 +14,19 @@ import java.util.UUID;
 @Table(name = "user")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String username;
-
     @Column(nullable = false, unique = true)
     private String email;
-
-    private String phone;
+    @Column(nullable = false)
     private String password;
-    private String role;
+    private String phone;
     private String createdAt;
-
     @Column(nullable = false)
     private boolean enabled = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
 }
