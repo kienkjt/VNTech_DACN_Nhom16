@@ -1,5 +1,7 @@
 package com.nhom16.VNTech.controller;
 
+import com.nhom16.VNTech.dto.ChangePasswordRequestDto;
+import com.nhom16.VNTech.dto.ResetPasswordRequestDto;
 import com.nhom16.VNTech.dto.UserRegistrationDto;
 import com.nhom16.VNTech.dto.LoginRequestDto;
 import com.nhom16.VNTech.entity.User;
@@ -8,6 +10,8 @@ import com.nhom16.VNTech.service.VerificationTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("users")
@@ -41,11 +45,59 @@ public class UserController {
     // Đăng nhập người dùng
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
-        boolean success = userService.authenticateUser(loginRequest).isEnabled();
+        boolean success = userService.authenticateUser(loginRequest).isActive();
         if (success) {
             return ResponseEntity.ok("Đăng nhập thành công!");
         } else {
             return ResponseEntity.status(401).body("Email hoặc mật khẩu không chính xác!");
         }
+    }
+    // Quên mật khẩu
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {
+        try {
+            userService.initiateForgotPassword(email);
+            return ResponseEntity.ok("Đã gửi mã xác nhận đặt lại mật khẩu đến email " + email);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+    // Xác minh OTP khi quên mật khẩu
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<?> verifyResetOtp(@RequestParam("otp") String otp) {
+        boolean valid = verificationTokenService.validateVerificationToken(otp);
+        if (valid) {
+            return ResponseEntity.ok("Xác thực OTP thành công! Bây giờ bạn có thể đặt lại mật khẩu.");
+        } else {
+            return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn!");
+        }
+    }
+
+    // Đặt lại mật khẩu
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam("email") String email,
+                                           @RequestParam("newPassword") String newPassword) {
+        Optional<User> userOpt = userService.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Không tìm thấy người dùng!");
+        }
+
+        User user = userOpt.get();
+        user.setPassword(userService.encodePassword(newPassword));
+        userService.saveUser(user);
+
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công!");
+    }
+
+    // Đổi mật khẩu (người dùng đã đăng nhập)
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordRequestDto dto,
+            @RequestParam("email") String email) {
+
+        boolean success = userService.changePassword(email, dto.getOldPassword(), dto.getNewPassword());
+        if (success)
+            return ResponseEntity.ok("Đổi mật khẩu thành công!");
+        return ResponseEntity.badRequest().body("Mật khẩu cũ không chính xác!");
     }
 }

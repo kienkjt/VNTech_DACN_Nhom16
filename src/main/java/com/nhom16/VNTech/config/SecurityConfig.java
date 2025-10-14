@@ -20,13 +20,13 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    // Mã hóa mật khẩu
+    //mã hóa mật khẩu
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Provider xác thực người dùng
+    //Provider xác thực người dùng
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -35,13 +35,13 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // Authentication Manager
+    //Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // Cấu hình Security chính
+    //Cấu hình chính Security
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -52,7 +52,11 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/users/register",
                                 "/users/login",
-                                "/users/verify-otp"
+                                "/users/verify-otp",
+                                "/users/forgot-password",
+                                "users/verify-reset-otp",
+                                "/users/reset-password",
+                                "/users/change-password"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
