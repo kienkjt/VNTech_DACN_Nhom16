@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -21,10 +24,17 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-    private String phone;
-    private String createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Address> addresses;
+
+    private String gender;
+    private String avatar;
+    private Date dateOfBirth;
+    private LocalDateTime createdAt;
+    private String updatedAt;
     @Column(nullable = false)
-    private boolean enabled = false;
+    private boolean isActive = false;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
