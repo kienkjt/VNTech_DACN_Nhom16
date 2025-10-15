@@ -31,15 +31,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerNewUserAccount(UserRegistrationDto userDto) {
-        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            throw new RuntimeException("Email đã được đăng ký!");
+        Optional<User> existingUserOpt = userRepository.findByEmail(userDto.getEmail());
+
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            // Nếu user đã xác thực
+            if (existingUser.isVerified()) {
+                throw new RuntimeException("Email đã được đăng ký!");
+            }
+            // Nếu user chưa xác thực => gửi lại OTP
+            String otp = tokenService.createVerificationToken(existingUser);
+            String subject = "VNTech - Xác thực lại tài khoản của bạn";
+            String message = "Xin chào " + existingUser.getUsername() + ",\n\nMã OTP của bạn là: " + otp +
+                    "\nMã có hiệu lực trong 2 phút.\n\nCảm ơn bạn đã đăng ký tại VNTech.";
+            emailService.sendEmail(existingUser.getEmail(), subject, message);
+            return existingUser;
         }
 
+        // Nếu email chưa tồn tại
         User user = new User();
         user.setEmail(userDto.getEmail());
         user.setUsername(userDto.getUsername() != null ? userDto.getUsername() : userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setActive(false);
+        user.setVerified(false);
+        user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
 
         // Gửi OTP xác thực
@@ -52,12 +67,13 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+
     @Override
     public User authenticateUser(LoginRequestDto loginRequest) {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + loginRequest.getEmail()));
 
-        if (!user.isActive()) {
+        if (!user.isVerified()) {
             throw new RuntimeException("Tài khoản chưa được xác minh qua OTP!");
         }
 

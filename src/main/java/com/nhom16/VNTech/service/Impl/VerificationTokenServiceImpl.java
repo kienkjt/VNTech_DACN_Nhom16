@@ -2,8 +2,10 @@ package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.entity.VerificationToken;
+import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.repository.VerificationTokenRepository;
 import com.nhom16.VNTech.service.VerificationTokenService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,26 +14,36 @@ import java.util.Optional;
 import java.util.Random;
 
 @Service
+@Transactional
 public class VerificationTokenServiceImpl implements VerificationTokenService {
 
     @Autowired
     private VerificationTokenRepository tokenRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     // Tạo OTP mới
+    @Transactional
     @Override
     public String createVerificationToken(User user) {
-        // Xóa token cũ của user nếu có
-        tokenRepository.deleteByUserId(user.getId());
-
-        // Sinh mã OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(2);
 
-        VerificationToken token = new VerificationToken(otp, user, expiryDate);
-        tokenRepository.save(token);
+        // Kiểm tra nếu đã có token
+        Optional<VerificationToken> existing = tokenRepository.findByUserId(user.getId());
+        VerificationToken token;
+        if (existing.isPresent()) {
+            token = existing.get();
+            token.setToken(otp);
+            token.setExpiryDate(expiryDate);
+        } else {
+            token = new VerificationToken(otp, user, expiryDate);
+        }
 
+        tokenRepository.save(token);
         return otp;
     }
+
 
     // Xác thực mã OTP
     @Override
@@ -41,15 +53,14 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
         VerificationToken token = tokenOpt.get();
 
-        // Hết hạn
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             tokenRepository.delete(token);
             return false;
         }
 
-        // Kích hoạt user
         User user = token.getUser();
-        user.setActive(true);
+        user.setVerified(true);
+        userRepository.save(user); // lưu lại trạng thái xác thực
 
         tokenRepository.delete(token);
         return true;
