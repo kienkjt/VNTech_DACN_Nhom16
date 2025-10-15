@@ -1,9 +1,14 @@
 package com.nhom16.VNTech.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Entity
 public class Address {
     @Id
