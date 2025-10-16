@@ -25,14 +25,15 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Address> addresses;
-
     private String gender;
     private String avatar;
     private Date dateOfBirth;
     private LocalDateTime createdAt;
-    private String updatedAt;
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Address> addresses;
+
     @Column(nullable = false)
     private boolean isActive = false;
 
