@@ -24,6 +24,7 @@ public class Product {
     private int stock;
     private int quantitySold;
     private String brand;
+    private String model;
     private int rating;
     private String origin;
     private LocalDateTime createdAt;
@@ -33,7 +34,18 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "products", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
+    @OneToMany(mappedBy = "products", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "products", cascade = CascadeType.ALL)
+    private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "products", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> images;
+
+    @OneToMany(mappedBy = "products", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductSpecification> specifications;
 }

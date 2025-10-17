@@ -11,26 +11,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Entity
-public class Review {
+@Table(name = "orders")
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product products;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    private String status;
+    private int totalPrice;
+    private LocalDateTime craeteAt;
 
-    @Column(nullable = false)
-    private double rating;
+    @ManyToOne()
+    private Address address;
 
-    @Column
-    private String comment;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
+    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL)
+    private Payment payment;
 }
