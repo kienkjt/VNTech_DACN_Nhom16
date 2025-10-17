@@ -45,15 +45,22 @@ public class UserController {
     // Đăng nhập người dùng
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
-        User user = userService.authenticateUser(loginRequest);
-        if (user == null) {
-            return ResponseEntity.status(401).body("Email hoặc mật khẩu không chính xác!");
+        try {
+            User user = userService.authenticateUser(loginRequest);
+
+            if (!user.isVerified()) {
+                return ResponseEntity.status(403).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực.");
+            }
+
+            return ResponseEntity.ok("Đăng nhập thành công!");
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Lỗi hệ thống: " + e.getMessage());
         }
-        if (!user.isVerified()) {
-            return ResponseEntity.status(403).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực.");
-        }
-        return ResponseEntity.ok("Đăng nhập thành công!");
     }
+
 
     // Quên mật khẩu
     @PostMapping("/forgot-password")
