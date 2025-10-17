@@ -51,13 +51,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/users/register",
-                                "/users/login",
-                                "/users/verify-otp",
-                                "/users/forgot-password",
-                                "/users/verify-reset-otp",
-                                "/users/reset-password",
-                                "/users/change-password"
+                                "/register",
+                                "/login",
+                                "/verify-otp",
+                                "/forgot-password",
+                                "/verify-reset-otp",
+                                "/reset-password",
+                                "/change-password"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

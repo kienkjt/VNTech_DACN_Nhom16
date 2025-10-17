@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("users")
+//@RequestMapping("users")
 @CrossOrigin(origins = "http://localhost:3000") // Cho phép React frontend gọi
 public class UserController {
 
@@ -45,13 +45,16 @@ public class UserController {
     // Đăng nhập người dùng
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
-        boolean success = userService.authenticateUser(loginRequest).isActive();
-        if (success) {
-            return ResponseEntity.ok("Đăng nhập thành công!");
-        } else {
+        User user = userService.authenticateUser(loginRequest);
+        if (user == null) {
             return ResponseEntity.status(401).body("Email hoặc mật khẩu không chính xác!");
         }
+        if (!user.isVerified()) {
+            return ResponseEntity.status(403).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực.");
+        }
+        return ResponseEntity.ok("Đăng nhập thành công!");
     }
+
     // Quên mật khẩu
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {
