@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class Role {
     private String roleName;
     private String roleDescription;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "role")
     private List<User> user;
 }

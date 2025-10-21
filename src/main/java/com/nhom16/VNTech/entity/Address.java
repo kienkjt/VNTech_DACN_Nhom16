@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,18 +13,26 @@ import java.util.List;
 @Entity
 @Table(name = "address")
 public class Address {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String recipientName;
     private String phoneNumber;
-    private String addressDetail;
-    private LocalDateTime createdAt;
+    private String province;       // Tỉnh/Thành phố
+    private String ward;           // Phường/Xã
+    private String addressDetail;  // Số nhà, tên đường
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    private boolean isDefault = false;  // Địa chỉ mặc định
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "address")
-    private List<Order> orders;
+     @OneToMany(mappedBy = "address")
+     private List<Order> orders;
 }
