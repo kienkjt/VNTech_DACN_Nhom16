@@ -1,19 +1,28 @@
 package com.nhom16.VNTech.controller;
 
+import com.nhom16.VNTech.config.JwtTokenProvider;
 import com.nhom16.VNTech.dto.UserRegistrationDto;
 import com.nhom16.VNTech.dto.LoginRequestDto;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 public class AuthController {
 
     @Autowired private AuthService authService;
+    @Autowired private AuthenticationManager authenticationManager;
+    @Autowired private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegistrationDto dto) {
@@ -24,13 +33,31 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
         try {
-            User user = authService.authenticateUser(loginRequest);
-
+            // Xác thực thông tin đăng nhập (email + password)
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Lấy thông tin user từ DB để kiểm tra xác minh email
+            User user = authService.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
             if (!user.isVerified()) {
                 return ResponseEntity.status(403).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực.");
             }
+            // Sinh token JWT
+            String token = jwtTokenProvider.generateToken(authentication);
 
-            return ResponseEntity.ok("Đăng nhập thành công!");
+            // Trả về cho frontend
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Đăng nhập thành công!");
+            response.put("token", token);
+            response.put("role", user.getRole().getRoleName());
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
+            return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(e.getMessage());

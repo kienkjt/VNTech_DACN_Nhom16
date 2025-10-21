@@ -1,33 +1,56 @@
 package com.nhom16.VNTech.controller.admin;
 
+import com.nhom16.VNTech.config.JwtTokenProvider;
+import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
-@PreAuthorize("hasAuthority('ADMIN')")
 @CrossOrigin(origins = "http://localhost:3000")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired private AdminService adminService;
+    @Autowired private JwtTokenProvider jwtTokenProvider;
 
+    private String extractEmailFromHeader(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            return jwtTokenProvider.getEmailFromToken(token);
+        }
+        throw new RuntimeException("Token không hợp lệ hoặc thiếu header Authorization");
+    }
     @GetMapping("/users")
-    public ResponseEntity<?> getAllUsers() {
-        return ResponseEntity.ok(adminService.getAllUsers());
+    public ResponseEntity<?> getAllUsers(@RequestHeader("Authorization") String authHeader) {
+        String adminEmail = extractEmailFromHeader(authHeader);
+        List<User> users = adminService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     @DeleteMapping("/users/{email}")
-    public ResponseEntity<?> deleteUser(@PathVariable String email) {
+    public ResponseEntity<?> deleteUser(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String email) {
+
+        String adminEmail = extractEmailFromHeader(authHeader);
         adminService.deleteUser(email);
-        return ResponseEntity.ok("Đã xóa người dùng có email: " + email);
+        return ResponseEntity.ok("Quản trị viên " + adminEmail + " đã xóa người dùng có email: " + email);
     }
 
     @PutMapping("/users/{email}/role")
-    public ResponseEntity<?> changeRole(@PathVariable String email, @RequestParam String role) {
+    public ResponseEntity<?> changeRole(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String email,
+            @RequestParam String role) {
+
+        String adminEmail = extractEmailFromHeader(authHeader);
         adminService.changeUserRole(email, role);
-        return ResponseEntity.ok("Đã cập nhật vai trò cho " + email);
+        return ResponseEntity.ok("Quản trị viên " + adminEmail + " đã cập nhật vai trò mới cho: " + email);
     }
 }
