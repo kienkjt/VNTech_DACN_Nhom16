@@ -1,6 +1,6 @@
 package com.nhom16.VNTech.controller.admin;
 
-import com.nhom16.VNTech.config.JwtTokenProvider;
+import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,12 @@ import java.util.List;
 public class AdminController {
 
     @Autowired private AdminService adminService;
-    @Autowired private JwtTokenProvider jwtTokenProvider;
+    @Autowired private JwtUtil jwtUtil;
 
     private String extractEmailFromHeader(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            return jwtTokenProvider.getEmailFromToken(token);
+            return jwtUtil.getEmailFromToken(token);
         }
         throw new RuntimeException("Token không hợp lệ hoặc thiếu header Authorization");
     }
