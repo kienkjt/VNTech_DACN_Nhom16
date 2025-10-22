@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.config;
 
+import com.nhom16.VNTech.security.JwtAuthenticationFilter;
 import com.nhom16.VNTech.service.Impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableMethodSecurity
-public class SecurityConfig {
+public class WebSecurityConfig {
 
     @Autowired private UserDetailsServiceImpl userDetailsService;
     @Autowired private JwtAuthenticationFilter jwtFilter;

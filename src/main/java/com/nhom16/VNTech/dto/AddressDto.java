@@ -8,6 +8,7 @@ public class AddressDto {
     private String recipientName;
     private String phoneNumber;
     private String province;
+    private String district;
     private String ward;
     private String addressDetail;
     private boolean isDefault;

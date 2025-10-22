@@ -21,6 +21,7 @@ public class Address {
     private String recipientName;
     private String phoneNumber;
     private String province;       // Tỉnh/Thành phố
+    private String district;       // Quận/Huyện
     private String ward;           // Phường/Xã
     private String addressDetail;  // Số nhà, tên đường
 
