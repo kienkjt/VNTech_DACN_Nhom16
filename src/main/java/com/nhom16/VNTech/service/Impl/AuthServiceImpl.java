@@ -2,8 +2,10 @@ package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.LoginRequestDto;
 import com.nhom16.VNTech.dto.UserRegistrationDto;
+import com.nhom16.VNTech.entity.Role;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.entity.VerificationToken;
+import com.nhom16.VNTech.repository.RoleRepository;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.repository.VerificationTokenRepository;
 import com.nhom16.VNTech.service.*;
@@ -24,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired private VerificationTokenRepository tokenRepository;
     @Autowired private EmailService emailService;
     @Autowired private BCryptPasswordEncoder passwordEncoder;
+    @Autowired private RoleRepository roleRepository;
 
     @Override
     public User register(UserRegistrationDto userDto) {
