@@ -50,6 +50,9 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(userDto.getUsername() != null ? userDto.getUsername() : userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setVerified(false);
+        Role defaultRole = roleRepository.findByRoleName("USER")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy role USER"));
+        user.setRole(defaultRole);
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
 
