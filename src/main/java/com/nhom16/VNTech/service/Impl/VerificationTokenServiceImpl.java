@@ -59,6 +59,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         }
 
         User user = token.getUser();
+        user.setActive(true);
         user.setVerified(true);
         userRepository.save(user); // lưu lại trạng thái xác thực
 
