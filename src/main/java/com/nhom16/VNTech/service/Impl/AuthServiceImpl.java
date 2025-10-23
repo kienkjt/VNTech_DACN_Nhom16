@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.LoginRequestDto;
-import com.nhom16.VNTech.dto.UserRegistrationDto;
+import com.nhom16.VNTech.dto.RegistrationRequestDto;
 import com.nhom16.VNTech.entity.Role;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.entity.VerificationToken;
@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired private RoleRepository roleRepository;
 
     @Override
-    public User register(UserRegistrationDto userDto) {
+    public User register(RegistrationRequestDto userDto) {
         Optional<User> existingUserOpt = userRepository.findByEmail(userDto.getEmail());
 
         if (existingUserOpt.isPresent()) {

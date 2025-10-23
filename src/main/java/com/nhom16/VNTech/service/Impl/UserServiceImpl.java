@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.AddressDto;
-import com.nhom16.VNTech.dto.UpdateProfileDto;
+import com.nhom16.VNTech.dto.UserProfileDto;
 import com.nhom16.VNTech.entity.Address;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.repository.UserRepository;
@@ -14,14 +14,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired private UserRepository userRepository;
     @Autowired private BCryptPasswordEncoder passwordEncoder;
-    @Autowired
-    private EmailService emailService;
+    @Autowired private EmailService emailService;
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -42,12 +42,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getProfileByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<UserProfileDto> getProfileByEmail(String email) {
+        return userRepository.findByEmail(email).map(this::convertToUserProfileDto);
+    }
+
+    private UserProfileDto convertToUserProfileDto(User user) {
+        UserProfileDto dto = new UserProfileDto();
+        dto.setEmail(user.getEmail());
+        dto.setUsername(user.getUsername());
+        dto.setFullName(user.getFullName());
+        dto.setGender(user.getGender());
+        dto.setAvatar(user.getAvatar());
+        dto.setDateOfBirth(user.getDateOfBirth());
+
+        if (user.getAddress() != null) {
+            List<AddressDto> addressDtos = user.getAddress().stream().map(address -> {
+                AddressDto addressDto = new AddressDto();
+                addressDto.setId(address.getId());
+                addressDto.setRecipientName(address.getRecipientName());
+                addressDto.setPhoneNumber(address.getPhoneNumber());
+                addressDto.setProvince(address.getProvince());
+                addressDto.setWard(address.getWard());
+                addressDto.setAddressDetail(address.getAddressDetail());
+                addressDto.setDefault(address.isDefault());
+                return addressDto;
+            }).collect(Collectors.toList());
+            dto.setAddresses(addressDtos);
+        }
+
+        return dto;
     }
 
     @Override
-    public void updateProfile(String email, UpdateProfileDto profileDto) {
+    public void updateProfile(String email, UserProfileDto profileDto) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
         user.setUsername(profileDto.getUsername());

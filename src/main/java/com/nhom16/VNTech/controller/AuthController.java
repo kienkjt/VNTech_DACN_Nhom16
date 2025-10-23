@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.LoginRequestDto;
-import com.nhom16.VNTech.dto.UserRegistrationDto;
+import com.nhom16.VNTech.dto.RegistrationRequestDto;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.AuthService;
@@ -28,7 +28,7 @@ public class AuthController {
     @Autowired private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegistrationDto dto) {
+    public ResponseEntity<?> register(@RequestBody RegistrationRequestDto dto) {
         try {
             authService.register(dto);
             return ResponseEntity.ok(Map.of(
@@ -69,9 +69,9 @@ public class AuthController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Đăng nhập thành công!");
             response.put("token", token);
-            response.put("username", user.getUsername());
-            response.put("email", user.getEmail());
-            response.put("role", user.getRole().getRoleName());
+//            response.put("username", user.getUsername());
+//            response.put("email", user.getEmail());
+//            response.put("role", user.getRole().getRoleName());
 
             return ResponseEntity.ok(response);
 

@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.ChangePasswordRequestDto;
-import com.nhom16.VNTech.dto.UpdateProfileDto;
+import com.nhom16.VNTech.dto.UserProfileDto;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,18 +40,18 @@ public class UserController {
         }
     }
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(UpdateProfileDto profileDto) {
+    public ResponseEntity<?> getProfile(UserProfileDto profileDto) {
         String email = getCurrentUserEmail();
-        Optional<User> userOpt = userService.getProfileByEmail(email);
+        Optional<UserProfileDto> userProfileDto = userService.getProfileByEmail(email);
 
-        if (userOpt.isEmpty()) {
+        if (userProfileDto.isEmpty()) {
             return ResponseEntity.badRequest().body("Không tìm thấy người dùng với email: " + email);
         }
 
-        return ResponseEntity.ok(userOpt.get());
+        return ResponseEntity.ok(userProfileDto.get());
     }
     @PutMapping("/update-profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileDto profileDto) {
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDto profileDto) {
         String email = getCurrentUserEmail();
 
         try {
