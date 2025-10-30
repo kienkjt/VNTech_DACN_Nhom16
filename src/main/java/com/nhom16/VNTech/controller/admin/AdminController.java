@@ -26,23 +26,21 @@ public class AdminController {
         }
         throw new RuntimeException("Token không hợp lệ hoặc thiếu header Authorization");
     }
+
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers(@RequestHeader("Authorization") String authHeader) {
         String adminEmail = extractEmailFromHeader(authHeader);
         List<User> users = adminService.getAllUsers();
         return ResponseEntity.ok(users);
     }
-
-    @DeleteMapping("/users/{email}")
-    public ResponseEntity<?> deleteUser(
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUserById(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String email) {
-
+            @PathVariable Long id) {
         String adminEmail = extractEmailFromHeader(authHeader);
-        adminService.deleteUser(email);
-        return ResponseEntity.ok("Quản trị viên " + adminEmail + " đã xóa người dùng có email: " + email);
+        adminService.deleteUser(id);
+        return ResponseEntity.ok("Quản trị viên " + adminEmail + " đã xóa người dùng có id: " + id);
     }
-
     @PutMapping("/users/{email}/role")
     public ResponseEntity<?> changeRole(
             @RequestHeader("Authorization") String authHeader,
