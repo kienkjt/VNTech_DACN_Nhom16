@@ -14,5 +14,5 @@ public class UserProfileDto {
     private String gender;
     private  String avatar;
     private Date dateOfBirth;
-    private List<AddressDto> addresses;
+    //private List<AddressDto> addresses;
 }

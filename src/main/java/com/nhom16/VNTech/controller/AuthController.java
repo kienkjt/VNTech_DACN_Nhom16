@@ -6,6 +6,7 @@ import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.AuthService;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class AuthController {
     @Autowired private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegistrationRequestDto dto) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequestDto dto) {
         try {
             authService.register(dto);
             return ResponseEntity.ok(Map.of(
