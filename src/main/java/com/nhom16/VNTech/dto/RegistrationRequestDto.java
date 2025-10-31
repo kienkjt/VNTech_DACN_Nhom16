@@ -19,6 +19,5 @@ public class RegistrationRequestDto {
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
 
-    @NotBlank(message = "Tên người dùng không được để trống")
     private String username;
 }
