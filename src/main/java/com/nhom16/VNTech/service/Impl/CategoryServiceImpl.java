@@ -1,6 +1,7 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.CategoryDto;
+import com.nhom16.VNTech.dto.CategoryRequestDto;
+import com.nhom16.VNTech.dto.CategoryResponseDto;
 import com.nhom16.VNTech.entity.Category;
 import com.nhom16.VNTech.repository.CategoryRepository;
 import com.nhom16.VNTech.service.CategoryService;
@@ -18,19 +19,19 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository categoryRepository;
 
     @Override
-    public CategoryDto createCategory(CategoryDto dto) {
+    public CategoryResponseDto createCategory(CategoryRequestDto dto) {
         Category category = new Category();
-        category.setName(dto.getName());
+        category.setName(dto.getCategoryName());
         category.setCreatedAt(LocalDateTime.now());
         categoryRepository.save(category);
         return mapToDto(category);
     }
 
     @Override
-    public CategoryDto updateCategory(Long id, CategoryDto dto) {
+    public CategoryResponseDto updateCategory(Long id, CategoryRequestDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-        category.setName(dto.getName());
+        category.setName(dto.getCategoryName());
         category.setUpdatedAt(LocalDateTime.now());
         categoryRepository.save(category);
         return mapToDto(category);
@@ -42,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getAllCategories() {
+    public List<CategoryResponseDto> getAllCategories() {
         return categoryRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
@@ -50,16 +51,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategoryById(Long id) {
+    public CategoryResponseDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         return mapToDto(category);
     }
 
-    private CategoryDto mapToDto(Category category) {
-        CategoryDto dto = new CategoryDto();
-        //dto.setId(category.getId());
-        dto.setName(category.getName());
+    private CategoryResponseDto mapToDto(Category category) {
+        CategoryResponseDto dto = new CategoryResponseDto();
+        dto.setId(category.getId());
+        dto.setCategoryName(category.getName());
+        dto.setCreatedDate(category.getCreatedAt());
+        dto.setUpdatedDate(category.getUpdatedAt());
         return dto;
     }
 }
