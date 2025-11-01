@@ -44,7 +44,8 @@ public class WebSecurityConfig {
                                 "/verify-otp",
                                 "/forgot-password",
                                 "/verify-reset-otp",
-                                "/reset-password"
+                                "/reset-password",
+                                "/products/**"
                         ).permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
