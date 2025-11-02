@@ -1,11 +1,11 @@
 package com.nhom16.VNTech.controller;
 
-import com.nhom16.VNTech.dto.LoginRequestDto;
-import com.nhom16.VNTech.dto.RegistrationRequestDto;
+import com.nhom16.VNTech.dto.*;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.AuthService;
-
+import com.nhom16.VNTech.service.Impl.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +15,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,6 +28,7 @@ public class AuthController {
     @Autowired private AuthService authService;
     @Autowired private AuthenticationManager authenticationManager;
     @Autowired private JwtUtil jwtUtil;
+    @Autowired private UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequestDto dto) {
@@ -63,16 +65,17 @@ public class AuthController {
                         .body(Map.of("error", "Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực."));
             }
 
-            // Sinh JWT
-            String token = jwtUtil.generateToken(authentication);
+            // Sinh JWT và Refresh Token
+            String accessToken = jwtUtil.generateToken(authentication);
+            String refreshToken = jwtUtil.generateRefreshToken(loginRequest.getEmail());
 
             // Trả về thông tin phản hồi
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Đăng nhập thành công!");
-            response.put("token", token);
-//            response.put("username", user.getUsername());
-//            response.put("email", user.getEmail());
-//            response.put("role", user.getRole().getRoleName());
+            response.put("accessToken", accessToken);
+            response.put("refreshToken", refreshToken);
+            response.put("tokenType", "Bearer");
+            response.put("expiresIn", 3600); // 1 giờ
 
             return ResponseEntity.ok(response);
 
@@ -87,6 +90,51 @@ public class AuthController {
                     .body(Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
         }
     }
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDto request,
+                                    HttpServletRequest httpRequest) {
+        return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto request) {
+        try {
+            String refreshToken = request.getRefreshToken();
+
+            if (!jwtUtil.validateToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Refresh token không hợp lệ!"));
+            }
+            // Kiểm tra xem refresh token có phải là access token không
+            String email = jwtUtil.getEmailFromToken(refreshToken);
+
+            // Tìm user và kiểm tra trạng thái
+            User user = authService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+            if (!user.isVerified() || !user.isActive()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Tài khoản không khả dụng"));
+            }
+
+            // Tạo token mới
+            String newAccessToken = jwtUtil.generateTokenFromEmail(email, user.getRole().getRoleName());
+            String newRefreshToken = jwtUtil.generateRefreshToken(email);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("accessToken", newAccessToken);
+            response.put("refreshToken", newRefreshToken);
+            response.put("tokenType", "Bearer");
+            response.put("expiresIn", 3600);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Không thể làm mới token: " + e.getMessage()));
+        }
+    }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestParam String otp) {
         boolean verified = authService.verifyOtp(otp);

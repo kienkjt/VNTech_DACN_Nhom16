@@ -41,11 +41,13 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 "/register",
                                 "/login",
+                                "/refresh-token", // Thêm endpoint refresh token
                                 "/verify-otp",
                                 "/forgot-password",
                                 "/verify-reset-otp",
                                 "/reset-password",
-                                "/products/**"
+                                "/products/**",
+                                "/categories/**" // Thêm categories vào public access
                         ).permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
