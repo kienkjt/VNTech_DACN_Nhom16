@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/admin/products")
+@RequestMapping("/admin/products")
 @RequiredArgsConstructor
 public class AdminProductController {
 
