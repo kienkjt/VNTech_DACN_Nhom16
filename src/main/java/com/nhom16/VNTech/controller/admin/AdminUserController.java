@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.controller.admin;
 
+import com.nhom16.VNTech.dto.UserDto;
 import com.nhom16.VNTech.security.JwtUtil;
-import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = "http://localhost:3000")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
@@ -30,8 +29,17 @@ public class AdminUserController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers(@RequestHeader("Authorization") String authHeader) {
         String adminEmail = extractEmailFromHeader(authHeader);
-        List<User> users = adminService.getAllUsers();
+        List<UserDto> users = adminService.getAllUserDtos();
         return ResponseEntity.ok(users);
+    }
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUserById(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long id) {
+
+        String adminEmail = extractEmailFromHeader(authHeader);
+        UserDto user = adminService.getUserDtoById(id);
+        return ResponseEntity.ok(user);
     }
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUserById(
@@ -41,6 +49,7 @@ public class AdminUserController {
         adminService.deleteUser(id);
         return ResponseEntity.ok("Quản trị viên " + adminEmail + " đã xóa người dùng có id: " + id);
     }
+
     @PutMapping("/users/{email}/role")
     public ResponseEntity<?> changeRole(
             @RequestHeader("Authorization") String authHeader,
