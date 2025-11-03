@@ -22,7 +22,6 @@ public class AdminProductController {
         ProductResponseDto createdProduct = productService.createProduct(request);
         return ResponseEntity.ok(createdProduct);
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(
             @PathVariable Long id,

@@ -15,7 +15,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<Page<ProductResponseDto>> getProducts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String productName,
