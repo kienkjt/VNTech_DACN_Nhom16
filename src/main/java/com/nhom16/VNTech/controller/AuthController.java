@@ -82,6 +82,7 @@ public class AuthController {
             response.put("refreshToken", refreshToken);
             response.put("tokenType", "Bearer");
             response.put("expiresIn", 3600); // 1 giờ
+            response.put("role", user.getRole().getRoleName());
 
             return ResponseEntity.ok(response);
 
