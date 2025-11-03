@@ -12,10 +12,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin/categories")
-public class CategoryController {
+public class AdminCategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+
+    public AdminCategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @PostMapping("")
     public ResponseEntity<?> createCategory(@RequestBody CategoryRequestDto dto) {
