@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AdminUserController {
 
     @Autowired private AdminService adminService;

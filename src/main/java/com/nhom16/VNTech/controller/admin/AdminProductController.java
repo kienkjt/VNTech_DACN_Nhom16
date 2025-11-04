@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/admin/products")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AdminProductController {
 
     private final ProductService productService;
