@@ -3,7 +3,6 @@ package com.nhom16.VNTech.controller.admin;
 import com.nhom16.VNTech.dto.CategoryRequestDto;
 import com.nhom16.VNTech.dto.CategoryResponseDto;
 import com.nhom16.VNTech.service.CategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin/categories")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
