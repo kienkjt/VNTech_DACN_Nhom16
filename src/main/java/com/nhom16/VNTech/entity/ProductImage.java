@@ -22,6 +22,9 @@ public class ProductImage {
     @Column(nullable = false)
     private boolean isMain = false;
 
+    @Column(name = "public_id") // Thêm field để lưu public_id từ Cloudinary
+    private String publicId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product products;
