@@ -27,7 +27,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         String folderName = "products/" + productId;
 
-        log.info("Uploading product image to folder: {}", folderName);
+        log.info("Tải hình ảnh lên thư mục: {}", folderName);
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
@@ -36,12 +36,12 @@ public class FileUploadServiceImpl implements FileUploadService {
                             "resource_type", "image"
                     ));
 
-            log.info("Successfully uploaded product image: {}", uploadResult.get("public_id"));
+            log.info("Tải hình ảnh sản phẩm thành công: {}", uploadResult.get("public_id"));
             return uploadResult;
 
         } catch (IOException e) {
-            log.error("Error uploading product image to Cloudinary: {}", e.getMessage());
-            throw new IOException("Failed to upload product image", e);
+            log.error("Lỗi khi tải hình ảnh sản phẩm lên Cloudinary: {}", e.getMessage());
+            throw new IOException("Tải hình ảnh sản phẩm thất bại", e);
         }
     }
 
@@ -51,7 +51,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         String folderName = "avatars/" + userId;
 
-        log.info("Uploading user avatar to folder: {}", folderName);
+        log.info("Tải avatar người dùng lên thư mục: {}", folderName);
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
@@ -61,12 +61,12 @@ public class FileUploadServiceImpl implements FileUploadService {
                             // Không dùng transformation để tránh lỗi
                     ));
 
-            log.info("Successfully uploaded user avatar: {}", uploadResult.get("public_id"));
+            log.info("Tải avatar người dùng thành công: {}", uploadResult.get("public_id"));
             return uploadResult;
 
         } catch (IOException e) {
-            log.error("Error uploading user avatar to Cloudinary: {}", e.getMessage());
-            throw new IOException("Failed to upload user avatar", e);
+            log.error("Lỗi khi tải avatar người dùng lên Cloudinary: {}", e.getMessage());
+            throw new IOException("Tải avatar người dùng thất bại", e);
         }
     }
 
@@ -88,15 +88,15 @@ public class FileUploadServiceImpl implements FileUploadService {
                 Map.of("format", "jpg")
         ));
 
-        log.info("Uploading product image with transformation to folder: {}", folderName);
+        log.info("Tải hình ảnh sản phẩm với transformation lên thư mục: {}", folderName);
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadOptions);
-            log.info("Successfully uploaded product image with transformation: {}", uploadResult.get("public_id"));
+            log.info("Tải hình ảnh sản phẩm với transformation thành công: {}", uploadResult.get("public_id"));
             return uploadResult;
         } catch (IOException e) {
-            log.error("Error uploading product image with transformation: {}", e.getMessage());
-            throw new IOException("Failed to upload product image", e);
+            log.error("Lỗi khi tải hình ảnh sản phẩm với transformation: {}", e.getMessage());
+            throw new IOException("Tải hình ảnh sản phẩm thất bại", e);
         }
     }
 
@@ -122,11 +122,11 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadOptions);
-            log.info("Successfully uploaded user avatar with transformation: {}", uploadResult.get("public_id"));
+            log.info("Tải avatar người dùng với transformation thành công: {}", uploadResult.get("public_id"));
             return uploadResult;
         } catch (IOException e) {
-            log.error("Error uploading user avatar with transformation: {}", e.getMessage());
-            throw new IOException("Failed to upload user avatar", e);
+            log.error("Lỗi khi tải avatar người dùng với transformation: {}", e.getMessage());
+            throw new IOException("Tải avatar người dùng thất bại", e);
         }
     }
 
@@ -145,12 +145,12 @@ public class FileUploadServiceImpl implements FileUploadService {
                             "transformation", "c_limit,w_800,h_800,q_auto,f_jpg"
                     ));
 
-            log.info("Successfully uploaded product image with string transformation: {}", uploadResult.get("public_id"));
+            log.info("Tải hình ảnh sản phẩm với transformation thành công: {}", uploadResult.get("public_id"));
             return uploadResult;
 
         } catch (IOException e) {
-            log.error("Error uploading product image with string transformation: {}", e.getMessage());
-            throw new IOException("Failed to upload product image", e);
+            log.error("Lỗi khi tải hình ảnh sản phẩm với transformation: {}", e.getMessage());
+            throw new IOException("Tải hình ảnh sản phẩm thất bại", e);
         }
     }
 
@@ -159,7 +159,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         String folderName = "avatars/" + userId;
 
-        log.info("Uploading user avatar with string transformation to folder: {}", folderName);
+        log.info("Đang tải lên ảnh đại diện người dùng (có transformation) vào thư mục: {}", folderName);
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
@@ -169,12 +169,12 @@ public class FileUploadServiceImpl implements FileUploadService {
                             "transformation", "c_fill,w_200,h_200,g_face,q_auto,f_jpg"
                     ));
 
-            log.info("Successfully uploaded user avatar with string transformation: {}", uploadResult.get("public_id"));
+            log.info("Tải lên ảnh đại diện người dùng thành công với public_id: {}", uploadResult.get("public_id"));
             return uploadResult;
 
         } catch (IOException e) {
-            log.error("Error uploading user avatar with string transformation: {}", e.getMessage());
-            throw new IOException("Failed to upload user avatar", e);
+            log.error("Lỗi khi tải lên ảnh đại diện người dùng: {}", e.getMessage());
+            throw new IOException("Không thể tải lên ảnh đại diện người dùng", e);
         }
     }
 
@@ -182,143 +182,143 @@ public class FileUploadServiceImpl implements FileUploadService {
     public Map uploadFile(MultipartFile file, String folderName) throws IOException {
         validateImageFile(file);
 
-        log.info("Uploading file to folder: {}", folderName);
+        log.info("Đang tải file lên thư mục: {}", folderName);
 
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
                             "folder", folderName,
-                            "resource_type", "auto" // Tự động detect loại file
+                            "resource_type", "auto" // Tự động nhận dạng loại file
                     ));
 
-            log.info("Successfully uploaded file: {}", uploadResult.get("public_id"));
+            log.info("Tải file thành công với public_id: {}", uploadResult.get("public_id"));
             return uploadResult;
 
         } catch (IOException e) {
-            log.error("Error uploading file to Cloudinary: {}", e.getMessage());
-            throw new IOException("Failed to upload file", e);
+            log.error("Lỗi khi tải file lên Cloudinary: {}", e.getMessage());
+            throw new IOException("Không thể tải file lên Cloudinary", e);
         }
     }
 
     @Override
     public void deleteImage(String publicId) throws IOException {
         if (publicId == null || publicId.trim().isEmpty()) {
-            throw new RuntimeException("Public ID cannot be null or empty");
+            throw new RuntimeException("Public ID không được để trống");
         }
 
-        log.info("Deleting image from Cloudinary with publicId: {}", publicId);
+        log.info("Đang xóa ảnh trên Cloudinary với publicId: {}", publicId);
 
         try {
             Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
 
             if ("ok".equals(result.get("result"))) {
-                log.info("Successfully deleted image with publicId: {}", publicId);
+                log.info("Xóa ảnh thành công với publicId: {}", publicId);
             } else {
-                log.warn("Delete operation returned: {}", result.get("result"));
-                throw new IOException("Failed to delete image from Cloudinary");
+                log.warn("Kết quả xóa ảnh trả về: {}", result.get("result"));
+                throw new IOException("Không thể xóa ảnh khỏi Cloudinary");
             }
 
         } catch (IOException e) {
-            log.error("Error deleting image from Cloudinary: {}", e.getMessage());
-            throw new IOException("Failed to delete image from Cloudinary", e);
+            log.error("Lỗi khi xóa ảnh trên Cloudinary: {}", e.getMessage());
+            throw new IOException("Không thể xóa ảnh khỏi Cloudinary", e);
         }
     }
 
-    // Xóa nhiều images
+    // Xóa nhiều ảnh
     public void deleteImages(List<String> publicIds) throws IOException {
         if (publicIds == null || publicIds.isEmpty()) {
             return;
         }
 
-        log.info("Deleting {} images from Cloudinary", publicIds.size());
+        log.info("Đang xóa {} ảnh trên Cloudinary", publicIds.size());
 
         for (String publicId : publicIds) {
             try {
                 deleteImage(publicId);
             } catch (IOException e) {
-                log.error("Failed to delete image with publicId: {}, error: {}", publicId, e.getMessage());
-                // Continue with other images even if one fails
+                log.error("Không thể xóa ảnh với publicId: {}, lỗi: {}", publicId, e.getMessage());
+                // Tiếp tục với các ảnh khác dù có lỗi
             }
         }
     }
 
-    // Lấy thông tin image từ Cloudinary
+    // Lấy thông tin ảnh từ Cloudinary
     public Map getImageInfo(String publicId) throws IOException {
         if (publicId == null || publicId.trim().isEmpty()) {
-            throw new RuntimeException("Public ID cannot be null or empty");
+            throw new RuntimeException("Public ID không được để trống");
         }
 
-        log.info("Getting image info for publicId: {}", publicId);
+        log.info("Đang lấy thông tin ảnh với publicId: {}", publicId);
 
         try {
             Map result = cloudinary.api().resource(publicId, ObjectUtils.emptyMap());
-            log.info("Successfully retrieved image info for: {}", publicId);
+            log.info("Lấy thông tin ảnh thành công cho publicId: {}", publicId);
             return result;
         } catch (Exception e) {
-            log.error("Error getting image info from Cloudinary: {}", e.getMessage());
-            throw new IOException("Failed to get image info from Cloudinary", e);
+            log.error("Lỗi khi lấy thông tin ảnh từ Cloudinary: {}", e.getMessage());
+            throw new IOException("Không thể lấy thông tin ảnh từ Cloudinary", e);
         }
     }
 
-    // Tạo signed URL cho upload (nếu cần bảo mật)
+    // Tạo upload signature (nếu cần bảo mật)
     public Map generateUploadSignature(Map<String, Object> params) {
         try {
-            // Cloudinary sẽ tự động sử dụng API secret từ config
+            // Cloudinary sẽ tự động sử dụng API secret từ cấu hình
             return cloudinary.api().createUploadPreset(params);
         } catch (Exception e) {
-            log.error("Error generating upload signature: {}", e.getMessage());
-            throw new RuntimeException("Failed to generate upload signature");
+            log.error("Lỗi khi tạo upload signature: {}", e.getMessage());
+            throw new RuntimeException("Không thể tạo upload signature");
         }
     }
 
-    // Validate image file
+    // Validate file ảnh
     private void validateImageFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("File is empty");
+            throw new RuntimeException("File bị trống");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new RuntimeException("File must be an image. Received: " + contentType);
+            throw new RuntimeException("File phải là ảnh. Nhận được: " + contentType);
         }
 
-        // Check file size (max 5MB)
+        // Giới hạn dung lượng file (tối đa 5MB)
         if (file.getSize() > 5 * 1024 * 1024) {
-            throw new RuntimeException("File size must be less than 5MB. Current size: " + file.getSize() + " bytes");
+            throw new RuntimeException("Dung lượng file phải nhỏ hơn 5MB. Kích thước hiện tại: " + file.getSize() + " bytes");
         }
 
-        // Check file extension
+        // Kiểm tra phần mở rộng
         String originalFilename = file.getOriginalFilename();
         if (originalFilename != null) {
             String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
             List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif", "webp", "bmp");
 
             if (!allowedExtensions.contains(extension)) {
-                throw new RuntimeException("Unsupported file format: " + extension +
-                        ". Supported formats: " + String.join(", ", allowedExtensions));
+                throw new RuntimeException("Định dạng file không được hỗ trợ: " + extension +
+                        ". Các định dạng được hỗ trợ: " + String.join(", ", allowedExtensions));
             }
         }
 
-        log.debug("File validation passed: {} ({} bytes, {})",
+        log.debug("Xác thực file thành công: {} ({} bytes, {})",
                 originalFilename, file.getSize(), contentType);
     }
 
-    // Helper method để extract publicId từ URL
+    // Helper method để trích xuất publicId từ URL
     public String extractPublicIdFromUrl(String url) {
         if (url == null || url.trim().isEmpty()) {
             return null;
         }
 
         try {
-            // Cloudinary URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567/public_id.jpg
+            // URL Cloudinary có dạng: https://res.cloudinary.com/cloud_name/image/upload/v1234567/public_id.jpg
             String[] parts = url.split("/upload/");
             if (parts.length > 1) {
                 String afterUpload = parts[1];
-                // Remove version if present
+                // Bỏ phần version nếu có
                 if (afterUpload.startsWith("v")) {
                     afterUpload = afterUpload.substring(afterUpload.indexOf('/') + 1);
                 }
-                // Remove file extension
+                // Bỏ phần đuôi file
                 int lastDotIndex = afterUpload.lastIndexOf('.');
                 if (lastDotIndex > 0) {
                     afterUpload = afterUpload.substring(0, lastDotIndex);
@@ -326,13 +326,13 @@ public class FileUploadServiceImpl implements FileUploadService {
                 return afterUpload;
             }
         } catch (Exception e) {
-            log.warn("Could not extract publicId from URL: {}", url);
+            log.warn("Không thể trích xuất publicId từ URL: {}", url);
         }
 
         return null;
     }
 
-    // Kiểm tra xem file có tồn tại trên Cloudinary không
+    // Kiểm tra xem ảnh có tồn tại trên Cloudinary không
     public boolean imageExists(String publicId) {
         if (publicId == null || publicId.trim().isEmpty()) {
             return false;
@@ -342,7 +342,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             Map info = getImageInfo(publicId);
             return info != null && !info.isEmpty();
         } catch (Exception e) {
-            log.debug("Image does not exist or error checking: {}", publicId);
+            log.debug("Ảnh không tồn tại hoặc lỗi khi kiểm tra: {}", publicId);
             return false;
         }
     }

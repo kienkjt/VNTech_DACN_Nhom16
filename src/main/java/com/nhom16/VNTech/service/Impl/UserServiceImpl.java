@@ -1,15 +1,13 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.AddressDto;
 import com.nhom16.VNTech.dto.UserProfileDto;
-import com.nhom16.VNTech.entity.Address;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.service.FileUploadService;
 import com.nhom16.VNTech.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +101,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateUserAvatar(Long userId, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new RuntimeException("Không có người dùng với id: " + userId));
 
         // Xóa avatar cũ nếu có
         if (user.getAvatar() != null) {
@@ -124,8 +122,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUserAvatar(Long userId) throws IOException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+                .orElseThrow(() -> new RuntimeException("Không có người dùng với "));
         if (user.getAvatar() != null) {
             // Trich xuất publicId từ URL hoặc lưu trữ riêng biệt
             user.setAvatar(null);
