@@ -55,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductResponseDto getProductById(Long id) {
         Product product = productRepository.findByIdWithCategory(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không có sản phẩm với id: " + id));
         return convertToDTO(product);
     }
 
@@ -65,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
         validateProductRequest(request);
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+                .orElseThrow(() -> new RuntimeException("Không có danh mục với id: " + request.getCategoryId()));
 
         Product product = buildProductEntity(request, category);
 
@@ -91,14 +91,14 @@ public class ProductServiceImpl implements ProductService {
         validateProductRequest(request);
 
         Product existingProduct = productRepository.findByIdWithCategory(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không có sản phẩm với id: " + id));
 
         updateProductEntity(existingProduct, request);
 
         // Cập nhật category nếu có thay đổi
         if (!existingProduct.getCategory().getId().equals(request.getCategoryId())) {
             Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+                    .orElseThrow(() -> new RuntimeException("Không có danh mục với id: " + request.getCategoryId()));
             existingProduct.setCategory(category);
         }
 
@@ -116,7 +116,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không có sản phẩm với id: " + id));
         productRepository.delete(product);
     }
 
@@ -124,10 +124,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void updateStock(Long productId, int newStock) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+                .orElseThrow(() -> new RuntimeException("Không có sản phẩm với id: " + productId));
 
         if (newStock < 0) {
-            throw new RuntimeException("Stock cannot be negative");
+            throw new RuntimeException("Hàng tồn kho không thể âm");
         }
 
         product.setStock(newStock);
@@ -168,11 +168,11 @@ public class ProductServiceImpl implements ProductService {
 
     private void validateProductRequest(ProductRequestDto request) {
         if (request.getSalePrice() > request.getOriginalPrice()) {
-            throw new RuntimeException("Sale price cannot be greater than original price");
+            throw new RuntimeException("Giá sale không thể lớn hơn giá gốc");
         }
 
         if (request.getStock() < 0) {
-            throw new RuntimeException("Stock cannot be negative");
+            throw new RuntimeException("Hàng tồn kho không thể âm");
         }
     }
 
