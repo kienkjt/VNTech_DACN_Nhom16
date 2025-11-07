@@ -3,7 +3,6 @@ package com.nhom16.VNTech.controller.admin;
 import com.nhom16.VNTech.dto.UserDto;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +15,13 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AdminUserController {
 
-    @Autowired private AdminService adminService;
-    @Autowired private JwtUtil jwtUtil;
+    private final AdminService adminService;
+    private final JwtUtil jwtUtil;
+
+    public AdminUserController(AdminService adminService, JwtUtil jwtUtil) {
+        this.adminService = adminService;
+        this.jwtUtil = jwtUtil;
+    }
 
     private String extractEmailFromHeader(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

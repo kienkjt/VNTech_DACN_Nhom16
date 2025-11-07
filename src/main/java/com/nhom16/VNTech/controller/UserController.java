@@ -23,11 +23,13 @@ import java.util.Optional;
 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    public UserController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     private String extractUserEmailFromRequest(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
