@@ -40,7 +40,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public boolean changePassword(String email, String oldPassword, String newPassword) {
+    public boolean changePassword(String email, String oldPassword, String newPassword,String confirmPassword) {
+        if (!newPassword.equals(confirmPassword)) {
+            logger.warn("Mật khẩu mới và xác nhận mật khẩu không khớp cho {}", email);
+            return false;
+        }
+
         logger.info("Đổi mật khẩu cho người dùng: {}", email);
 
         Optional<User> userOpt = userRepository.findByEmail(email);
