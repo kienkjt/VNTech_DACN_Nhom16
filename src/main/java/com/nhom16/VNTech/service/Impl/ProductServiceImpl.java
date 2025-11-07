@@ -271,7 +271,9 @@ public class ProductServiceImpl implements ProductService {
         if (product.getCategory() != null) {
             dto.setCategory(new com.nhom16.VNTech.dto.CategoryResponseDto(
                     product.getCategory().getId(),
-                    product.getCategory().getName()
+                    product.getCategory().getName(),
+                    product.getCategory().getCreatedAt(),
+                    product.getCategory().getUpdatedAt()
             ));
         }
 
