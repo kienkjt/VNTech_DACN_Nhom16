@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface UserService {
     Optional<User> findByEmail(String email);
-    boolean changePassword(String email, String oldPassword, String newPassword);
+    boolean changePassword(String email, String oldPassword, String newPassword, String confirmPassword);
     Optional<UserProfileDto> getProfileByEmail(String email);
     void updateProfile(String email, UserProfileDto profileDto);
     User updateUserAvatar(Long userId, MultipartFile file) throws IOException;

@@ -47,13 +47,13 @@ public class UserController {
                                             HttpServletRequest request) {
         String email = extractUserEmailFromRequest(request);
 
-        boolean success = userService.changePassword(email, dto.getOldPassword(), dto.getNewPassword());
+        boolean success = userService.changePassword(email, dto.getOldPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
 
         if (success) {
             return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công!"));
         } else {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Mật khẩu cũ không chính xác!"));
+                    .body(Map.of("error", "Đổi mật khẩu thất bại! Vui lòng kiểm tra lại thông tin."));
         }
     }
 
