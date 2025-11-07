@@ -2,6 +2,7 @@ package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.ChangePasswordRequestDto;
 import com.nhom16.VNTech.dto.UserProfileDto;
+import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,11 +23,13 @@ import java.util.Optional;
 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    public UserController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     private String extractUserEmailFromRequest(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -78,5 +83,19 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Lỗi khi cập nhật hồ sơ: " + e.getMessage()));
         }
+    }
+    @PostMapping("/profile/{userId}/avatar")
+    public ResponseEntity<User> uploadAvatar(
+            @PathVariable Long userId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        User user = userService.updateUserAvatar(userId, file);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/profile/{userId}/avatar")
+    public ResponseEntity<Void> deleteAvatar(@PathVariable Long userId) throws IOException {
+        userService.deleteUserAvatar(userId);
+        return ResponseEntity.noContent().build();
     }
 }

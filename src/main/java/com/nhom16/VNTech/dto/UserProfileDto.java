@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nhom16.VNTech.entity.User;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class UserProfileDto {
     private String fullName;
     private String gender;
     private  String avatar;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "Asia/Ho_Chi_Minh")
     private Date dateOfBirth;
     //private List<AddressDto> addresses;
 }

@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
     // Tìm sản phẩm theo ID và load cả Category
     @EntityGraph(attributePaths = "category")
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.id = :id")

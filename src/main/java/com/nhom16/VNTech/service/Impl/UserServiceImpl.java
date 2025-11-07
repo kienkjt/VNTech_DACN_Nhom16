@@ -1,30 +1,37 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.AddressDto;
 import com.nhom16.VNTech.dto.UserProfileDto;
-import com.nhom16.VNTech.entity.Address;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.repository.UserRepository;
+import com.nhom16.VNTech.service.FileUploadService;
 import com.nhom16.VNTech.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private BCryptPasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final FileUploadService fileUploadService;
+
+    public UserServiceImpl(FileUploadService fileUploadService, BCryptPasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.fileUploadService = fileUploadService;
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -69,22 +76,6 @@ public class UserServiceImpl implements UserService {
         dto.setAvatar(user.getAvatar());
         dto.setDateOfBirth(user.getDateOfBirth());
 
-//        if (user.getAddress() != null && !user.getAddress().isEmpty()) {
-//            List<AddressDto> addressDtos = user.getAddress().stream().map(address -> {
-//                AddressDto addressDto = new AddressDto();
-//                addressDto.setId(address.getId());
-//                addressDto.setRecipientName(address.getRecipientName());
-//                addressDto.setPhoneNumber(address.getPhoneNumber());
-//                addressDto.setProvince(address.getProvince());
-//                addressDto.setDistrict(address.getDistrict());
-//                addressDto.setWard(address.getWard());
-//                addressDto.setAddressDetail(address.getAddressDetail());
-//                addressDto.setDefault(address.isDefault());
-//                return addressDto;
-//            }).collect(Collectors.toList());
-//            dto.setAddresses(addressDtos);
-//        }
-
         return dto;
     }
 
@@ -100,35 +91,42 @@ public class UserServiceImpl implements UserService {
         user.setFullName(profileDto.getFullName());
         user.setGender(profileDto.getGender());
         user.setDateOfBirth(profileDto.getDateOfBirth());
-        user.setAvatar(profileDto.getAvatar());
+//        user.setAvatar(profileDto.getAvatar());
         user.setUpdatedAt(LocalDateTime.now());
-
-//        if (profileDto.getAddresses() != null && !profileDto.getAddresses().isEmpty()) {
-//            // Xóa tất cả địa chỉ cũ
-//            if (user.getAddress() != null) {
-//                user.getAddress().clear();
-//            }
-//
-//            // Thêm địa chỉ mới
-//            List<Address> updatedAddresses = profileDto.getAddresses().stream().map(a -> {
-//                Address address = new Address();
-//                address.setId(a.getId());
-//                address.setRecipientName(a.getRecipientName());
-//                address.setPhoneNumber(a.getPhoneNumber());
-//                address.setProvince(a.getProvince());
-//                address.setDistrict(a.getDistrict());
-//                address.setWard(a.getWard());
-//                address.setAddressDetail(a.getAddressDetail());
-//                address.setDefault(a.isDefault());
-//                address.setUser(user);
-//                address.setUpdatedAt(LocalDateTime.now());
-//                return address;
-//            }).collect(Collectors.toList());
-//
-//            user.setAddress(updatedAddresses);
-//        }
 
         userRepository.save(user);
         logger.info("Cập nhật profile thành công cho: {}", email);
+    }
+    @Override
+    @Transactional
+    public User updateUserAvatar(Long userId, MultipartFile file) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không có người dùng với id: " + userId));
+
+        // Xóa avatar cũ nếu có
+        if (user.getAvatar() != null) {
+            // Trich xuất publicId từ URL hoặc lưu trữ riêng biệt
+            // fileUploadService.deleteImage(publicId);
+            user.setAvatar(null);
+        }
+
+        // Upload avatar mới
+        Map uploadResult = fileUploadService.uploadUserAvatar(file, userId);
+        String avatarUrl = uploadResult.get("secure_url").toString();
+
+        user.setAvatar(avatarUrl);
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserAvatar(Long userId) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không có người dùng với "));
+        if (user.getAvatar() != null) {
+            // Trich xuất publicId từ URL hoặc lưu trữ riêng biệt
+            user.setAvatar(null);
+            userRepository.save(user);
+        }
     }
 }
