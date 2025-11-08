@@ -1,7 +1,8 @@
 package com.nhom16.VNTech.controller;
 
-import com.nhom16.VNTech.dto.ProductFilterDto;
-import com.nhom16.VNTech.dto.ProductResponseDto;
+import com.nhom16.VNTech.dto.APIResponse;
+import com.nhom16.VNTech.dto.product.ProductFilterDto;
+import com.nhom16.VNTech.dto.product.ProductResponseDto;
 import com.nhom16.VNTech.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,12 +12,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProductController {
 
     private final ProductService productService;
 
     @GetMapping("")
-    public ResponseEntity<Page<ProductResponseDto>> getProducts(
+    public ResponseEntity<APIResponse<Page<ProductResponseDto>>> getProducts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) String brand,
@@ -39,12 +41,12 @@ public class ProductController {
         filter.setSortDirection(sortDirection);
 
         Page<ProductResponseDto> products = productService.getProducts(filter);
-        return ResponseEntity.ok(products);
+        return ResponseEntity.ok(APIResponse.success(products, "Lấy danh sách sản phẩm thành công"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDto> getProductById(@PathVariable Long id) {
+    public ResponseEntity<APIResponse<ProductResponseDto>> getProductById(@PathVariable Long id) {
         ProductResponseDto product = productService.getProductById(id);
-        return ResponseEntity.ok(product);
+        return ResponseEntity.ok(APIResponse.success(product, "Lấy chi tiết sản phẩm thành công"));
     }
 }
