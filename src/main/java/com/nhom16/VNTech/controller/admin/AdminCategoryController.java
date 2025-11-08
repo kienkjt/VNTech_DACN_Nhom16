@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.controller.admin;
 
+import com.nhom16.VNTech.dto.APIResponse;
 import com.nhom16.VNTech.dto.CategoryRequestDto;
 import com.nhom16.VNTech.dto.CategoryResponseDto;
 import com.nhom16.VNTech.service.CategoryService;
@@ -21,57 +22,59 @@ public class AdminCategoryController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createCategory(@RequestBody CategoryRequestDto dto) {
+    public ResponseEntity<APIResponse<CategoryResponseDto>> createCategory(@RequestBody CategoryRequestDto dto) {
         try {
             CategoryResponseDto created = categoryService.createCategory(dto);
-            return ResponseEntity.ok(created);
+            return ResponseEntity.ok(APIResponse.success(created, "Tạo danh mục thành công"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Lỗi khi tạo danh mục: " + e.getMessage());
+                    .body(APIResponse.error("Lỗi khi tạo danh mục: " + e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody CategoryRequestDto dto) {
+    public ResponseEntity<APIResponse<CategoryResponseDto>> updateCategory(
+            @PathVariable Long id,
+            @RequestBody CategoryRequestDto dto) {
         try {
             CategoryResponseDto updated = categoryService.updateCategory(id, dto);
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(APIResponse.success(updated, "Cập nhật danh mục thành công"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Không tìm thấy danh mục có ID: " + id);
+                    .body(APIResponse.error("Không tìm thấy danh mục có ID: " + id));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<APIResponse<String>> deleteCategory(@PathVariable Long id) {
         try {
             categoryService.deleteCategory(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(APIResponse.success(null, "Xóa danh mục thành công"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Xóa thất bại: Không tìm thấy danh mục có ID: " + id);
+                    .body(APIResponse.error("Xóa thất bại: Không tìm thấy danh mục có ID: " + id));
         }
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllCategories() {
+    public ResponseEntity<APIResponse<List<CategoryResponseDto>>> getAllCategories() {
         try {
             List<CategoryResponseDto> categories = categoryService.getAllCategories();
-            return ResponseEntity.ok(categories);
+            return ResponseEntity.ok(APIResponse.success(categories, "Lấy danh sách danh mục thành công"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Lỗi khi lấy danh sách danh mục: " + e.getMessage());
+                    .body(APIResponse.error("Lỗi khi lấy danh sách danh mục: " + e.getMessage()));
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<APIResponse<CategoryResponseDto>> getCategoryById(@PathVariable Long id) {
         try {
             CategoryResponseDto category = categoryService.getCategoryById(id);
-            return ResponseEntity.ok(category);
+            return ResponseEntity.ok(APIResponse.success(category, "Lấy thông tin danh mục thành công"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Không tìm thấy danh mục có ID: " + id);
+                    .body(APIResponse.error("Không tìm thấy danh mục có ID: " + id));
         }
     }
 }
