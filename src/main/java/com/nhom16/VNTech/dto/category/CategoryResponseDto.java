@@ -1,4 +1,4 @@
-package com.nhom16.VNTech.dto;
+package com.nhom16.VNTech.dto.category;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

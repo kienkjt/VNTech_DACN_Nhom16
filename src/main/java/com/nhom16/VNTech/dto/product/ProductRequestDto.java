@@ -1,4 +1,4 @@
-package com.nhom16.VNTech.dto;
+package com.nhom16.VNTech.dto.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

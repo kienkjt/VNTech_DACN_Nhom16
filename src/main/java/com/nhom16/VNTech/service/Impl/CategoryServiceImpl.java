@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.CategoryRequestDto;
-import com.nhom16.VNTech.dto.CategoryResponseDto;
+import com.nhom16.VNTech.dto.category.CategoryRequestDto;
+import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import com.nhom16.VNTech.entity.Category;
 import com.nhom16.VNTech.repository.CategoryRepository;
 import com.nhom16.VNTech.service.CategoryService;

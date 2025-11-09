@@ -1,7 +1,7 @@
-package com.nhom16.VNTech.dto;
+package com.nhom16.VNTech.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jdk.jshell.Snippet;
+import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

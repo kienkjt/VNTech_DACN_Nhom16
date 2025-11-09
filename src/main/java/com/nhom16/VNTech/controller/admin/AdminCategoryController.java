@@ -1,8 +1,8 @@
 package com.nhom16.VNTech.controller.admin;
 
 import com.nhom16.VNTech.dto.APIResponse;
-import com.nhom16.VNTech.dto.CategoryRequestDto;
-import com.nhom16.VNTech.dto.CategoryResponseDto;
+import com.nhom16.VNTech.dto.category.CategoryRequestDto;
+import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import com.nhom16.VNTech.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

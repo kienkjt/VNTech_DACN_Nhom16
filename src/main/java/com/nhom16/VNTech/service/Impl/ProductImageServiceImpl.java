@@ -1,6 +1,6 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.ProductImageResponseDto;
+import com.nhom16.VNTech.dto.product.ProductImageResponseDto;
 import com.nhom16.VNTech.entity.Product;
 import com.nhom16.VNTech.entity.ProductImage;
 import com.nhom16.VNTech.repository.ProductImageRepository;
