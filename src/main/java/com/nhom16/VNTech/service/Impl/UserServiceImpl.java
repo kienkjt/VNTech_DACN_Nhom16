@@ -104,24 +104,27 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     @Transactional
-    public User updateUserAvatar(Long userId, MultipartFile file) throws IOException {
+    public UserProfileDto updateUserAvatar(Long userId, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không có người dùng với id: " + userId));
 
-        // Xóa avatar cũ nếu có
-        if (user.getAvatar() != null) {
-            // Trich xuất publicId từ URL hoặc lưu trữ riêng biệt
-            // fileUploadService.deleteImage(publicId);
-            user.setAvatar(null);
-        }
-
-        // Upload avatar mới
+        // Upload ảnh mới trước
         Map uploadResult = fileUploadService.uploadUserAvatar(file, userId);
         String avatarUrl = uploadResult.get("secure_url").toString();
 
+        // Nếu có avatar cũ, xóa sau khi upload thành công
+        if (user.getAvatar() != null) {
+            // String publicId = extractPublicId(user.getAvatar());
+            // fileUploadService.deleteImage(publicId);
+        }
+
         user.setAvatar(avatarUrl);
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        // Trả về DTO (ẩn password, role, ... )
+        return convertToUserProfileDto(user);
     }
+
 
     @Override
     @Transactional

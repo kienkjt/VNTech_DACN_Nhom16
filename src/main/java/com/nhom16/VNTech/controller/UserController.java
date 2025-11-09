@@ -88,13 +88,14 @@ public class UserController {
         return ResponseEntity.ok(APIResponse.success(null, "Cập nhật hồ sơ thành công!"));
     }
     @PostMapping("/profile/{userId}/avatar")
-    public ResponseEntity<APIResponse<User>> uploadAvatar(
+    public ResponseEntity<APIResponse<UserProfileDto>> uploadAvatar(
             @PathVariable Long userId,
             @RequestParam("file") MultipartFile file) throws IOException {
 
-        User updatedUser = userService.updateUserAvatar(userId, file);
+        UserProfileDto updatedUser = userService.updateUserAvatar(userId, file);
         return ResponseEntity.ok(APIResponse.success(updatedUser, "Tải ảnh đại diện thành công!"));
     }
+
 
     @DeleteMapping("/profile/{userId}/avatar")
     public ResponseEntity<APIResponse<Void>> deleteAvatar(@PathVariable Long userId) throws IOException {

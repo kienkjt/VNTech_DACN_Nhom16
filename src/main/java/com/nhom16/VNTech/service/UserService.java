@@ -12,6 +12,6 @@ public interface UserService {
     boolean changePassword(String email, String oldPassword, String newPassword, String confirmPassword);
     Optional<UserProfileDto> getProfileByEmail(String email);
     void updateProfile(String email, UserProfileDto profileDto);
-    User updateUserAvatar(Long userId, MultipartFile file) throws IOException;
+    UserProfileDto updateUserAvatar(Long userId, MultipartFile file) throws IOException;
     void deleteUserAvatar(Long userId) throws IOException;
 }
