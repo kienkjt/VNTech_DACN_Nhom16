@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.service;
 
-import com.nhom16.VNTech.dto.CategoryRequestDto;
-import com.nhom16.VNTech.dto.CategoryResponseDto;
+import com.nhom16.VNTech.dto.category.CategoryRequestDto;
+import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import java.util.List;
 
 public interface CategoryService {

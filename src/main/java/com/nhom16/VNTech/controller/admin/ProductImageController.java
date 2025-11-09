@@ -1,6 +1,6 @@
 package com.nhom16.VNTech.controller.admin;
 
-import com.nhom16.VNTech.dto.ProductImageResponseDto;
+import com.nhom16.VNTech.dto.product.ProductImageResponseDto;
 import com.nhom16.VNTech.service.ProductImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

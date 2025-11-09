@@ -1,8 +1,7 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.ProductFilterDto;
-import com.nhom16.VNTech.dto.ProductRequestDto;
-import com.nhom16.VNTech.dto.ProductResponseDto;
+import com.nhom16.VNTech.dto.product.*;
+import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import com.nhom16.VNTech.entity.*;
 import com.nhom16.VNTech.repository.CategoryRepository;
 import com.nhom16.VNTech.repository.ProductRepository;
@@ -206,7 +205,7 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
     }
 
-    private List<ProductImage> buildProductImages(List<com.nhom16.VNTech.dto.ProductImageDto> imageDTOs, Product product) {
+    private List<ProductImage> buildProductImages(List<ProductImageDto> imageDTOs, Product product) {
         return imageDTOs.stream()
                 .map(imageDTO -> {
                     ProductImage image = new ProductImage();
@@ -219,7 +218,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private List<ProductSpecification> buildProductSpecifications(
-            List<com.nhom16.VNTech.dto.ProductSpecificationDto> specDTOs, Product product) {
+            List<ProductSpecificationDto> specDTOs, Product product) {
         return specDTOs.stream()
                 .map(specDTO -> {
                     ProductSpecification spec = new ProductSpecification();
@@ -231,7 +230,7 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
-    private void updateProductImages(Product product, List<com.nhom16.VNTech.dto.ProductImageDto> imageDTOs) {
+    private void updateProductImages(Product product, List<ProductImageDto> imageDTOs) {
         if (imageDTOs != null) {
             product.getImages().clear();
             if (!imageDTOs.isEmpty()) {
@@ -241,7 +240,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private void updateProductSpecifications(Product product, List<com.nhom16.VNTech.dto.ProductSpecificationDto> specDTOs) {
+    private void updateProductSpecifications(Product product, List<ProductSpecificationDto> specDTOs) {
         if (specDTOs != null) {
             product.getSpecifications().clear();
             if (!specDTOs.isEmpty()) {
@@ -269,7 +268,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Category
         if (product.getCategory() != null) {
-            dto.setCategory(new com.nhom16.VNTech.dto.CategoryResponseDto(
+            dto.setCategory(new CategoryResponseDto(
                     product.getCategory().getId(),
                     product.getCategory().getName(),
                     product.getCategory().getCreatedAt(),
@@ -279,8 +278,8 @@ public class ProductServiceImpl implements ProductService {
 
         // Images
         if (product.getImages() != null && !product.getImages().isEmpty()) {
-            List<com.nhom16.VNTech.dto.ProductImageDto> imageDTOs = product.getImages().stream()
-                    .map(image -> new com.nhom16.VNTech.dto.ProductImageDto(
+            List<ProductImageDto> imageDTOs = product.getImages().stream()
+                    .map(image -> new ProductImageDto(
                             image.getImageUrl(),
                             image.isMain()
                     ))
@@ -290,8 +289,8 @@ public class ProductServiceImpl implements ProductService {
 
         // Specifications
         if (product.getSpecifications() != null && !product.getSpecifications().isEmpty()) {
-            List<com.nhom16.VNTech.dto.ProductSpecificationDto> specDTOs = product.getSpecifications().stream()
-                    .map(spec -> new com.nhom16.VNTech.dto.ProductSpecificationDto(
+            List<ProductSpecificationDto> specDTOs = product.getSpecifications().stream()
+                    .map(spec -> new ProductSpecificationDto(
                             spec.getKeyName(),
                             spec.getValue()
                     ))

@@ -1,4 +1,4 @@
-package com.nhom16.VNTech.dto;
+package com.nhom16.VNTech.dto.category;
 
 import lombok.Data;
 

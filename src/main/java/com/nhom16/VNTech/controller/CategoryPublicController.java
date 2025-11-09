@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.APIResponse;
-import com.nhom16.VNTech.dto.CategoryResponseDto;
+import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import com.nhom16.VNTech.service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
