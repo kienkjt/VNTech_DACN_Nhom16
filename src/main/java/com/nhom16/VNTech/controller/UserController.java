@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.controller;
 
+import com.nhom16.VNTech.dto.APIResponse;
 import com.nhom16.VNTech.dto.ChangePasswordRequestDto;
 import com.nhom16.VNTech.dto.UserProfileDto;
 import com.nhom16.VNTech.entity.User;
@@ -7,19 +8,18 @@ import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${app.frontend.url:http://localhost:3000}")
 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 public class UserController {
 
@@ -43,59 +43,62 @@ public class UserController {
         throw new RuntimeException("Không tìm thấy JWT trong header Authorization!");
     }
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequestDto dto,
-                                            HttpServletRequest request) {
-        String email = extractUserEmailFromRequest(request);
+    public ResponseEntity<APIResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequestDto dto,
+            HttpServletRequest request) {
 
-        boolean success = userService.changePassword(email, dto.getOldPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
+        String email = extractUserEmailFromRequest(request);
+        boolean success = userService.changePassword(
+                email,
+                dto.getOldPassword(),
+                dto.getNewPassword(),
+                dto.getConfirmNewPassword()
+        );
 
         if (success) {
-            return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công!"));
+            return ResponseEntity.ok(APIResponse.success(null, "Đổi mật khẩu thành công!"));
         } else {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Đổi mật khẩu thất bại! Vui lòng kiểm tra lại thông tin."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.error("Đổi mật khẩu thất bại! Vui lòng kiểm tra lại thông tin."));
         }
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+    public ResponseEntity<APIResponse<UserProfileDto>> getProfile(HttpServletRequest request) {
         String email = extractUserEmailFromRequest(request);
 
         Optional<UserProfileDto> profile = userService.getProfileByEmail(email);
 
         if (profile.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Không tìm thấy người dùng với email: " + email));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.error("Không tìm thấy người dùng với email: " + email));
         }
 
-        return ResponseEntity.ok(profile.get());
+        return ResponseEntity.ok(APIResponse.success(profile.get(), "Lấy thông tin hồ sơ thành công!"));
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@Valid @RequestBody UserProfileDto profileDto,
-                                           HttpServletRequest request) {
-        String email = extractUserEmailFromRequest(request);
+    public ResponseEntity<APIResponse<Void>> updateProfile(
+            @Valid @RequestBody UserProfileDto profileDto,
+            HttpServletRequest request) {
 
-        try {
-            userService.updateProfile(email, profileDto);
-            return ResponseEntity.ok(Map.of("message", "Cập nhật hồ sơ thành công!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Lỗi khi cập nhật hồ sơ: " + e.getMessage()));
-        }
+        String email = extractUserEmailFromRequest(request);
+        userService.updateProfile(email, profileDto);
+
+        return ResponseEntity.ok(APIResponse.success(null, "Cập nhật hồ sơ thành công!"));
     }
     @PostMapping("/profile/{userId}/avatar")
-    public ResponseEntity<User> uploadAvatar(
+    public ResponseEntity<APIResponse<User>> uploadAvatar(
             @PathVariable Long userId,
             @RequestParam("file") MultipartFile file) throws IOException {
 
-        User user = userService.updateUserAvatar(userId, file);
-        return ResponseEntity.ok(user);
+        User updatedUser = userService.updateUserAvatar(userId, file);
+        return ResponseEntity.ok(APIResponse.success(updatedUser, "Tải ảnh đại diện thành công!"));
     }
 
     @DeleteMapping("/profile/{userId}/avatar")
-    public ResponseEntity<Void> deleteAvatar(@PathVariable Long userId) throws IOException {
+    public ResponseEntity<APIResponse<Void>> deleteAvatar(@PathVariable Long userId) throws IOException {
         userService.deleteUserAvatar(userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(APIResponse.success(null, "Xóa ảnh đại diện thành công!"));
     }
 }
