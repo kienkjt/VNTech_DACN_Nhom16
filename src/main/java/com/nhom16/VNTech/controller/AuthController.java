@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-@CrossOrigin(origins = "http://localhost:3000")
+
+@CrossOrigin(origins = "${app.frontend.url:http://localhost:3000}")
 @RestController
 public class AuthController {
 
@@ -36,20 +37,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequestDto dto) {
+    public ResponseEntity<APIResponse<Void>> register(@Valid @RequestBody RegistrationRequestDto dto) {
         try {
             authService.register(dto);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Đăng ký thành công! OTP đã được gửi đến email của bạn."
-            ));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(APIResponse.success(null, "Đăng ký thành công! OTP đã được gửi đến email của bạn."));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(APIResponse.error(e.getMessage()));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
+    public ResponseEntity<APIResponse<Map<String, Object>>> login(@RequestBody LoginRequestDto loginRequest) {
         try {
             // Xác thực tài khoản
             Authentication authentication = authenticationManager.authenticate(
@@ -61,13 +61,12 @@ public class AuthController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Lấy thông tin người dùng
             User user = authService.findByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
 
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("error", "Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực."));
+                        .body(APIResponse.error("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email xác thực."));
             }
 
             // Sinh JWT và Refresh Token
@@ -83,47 +82,45 @@ public class AuthController {
             response.put("expiresIn", 3600); // 1 giờ
             response.put("role", user.getRole().getRoleName());
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(APIResponse.success(response, "Đăng nhập thành công!"));
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Email hoặc mật khẩu không chính xác!"));
+                    .body(APIResponse.error("Email hoặc mật khẩu không chính xác!"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(APIResponse.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
+                    .body(APIResponse.error("Lỗi hệ thống: " + e.getMessage()));
         }
     }
+
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDto request,
-                                    HttpServletRequest httpRequest) {
-        return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
+    public ResponseEntity<APIResponse<Void>> logout(@RequestBody RefreshTokenRequestDto request, HttpServletRequest httpRequest) {
+        return ResponseEntity.ok(APIResponse.success(null, "Đăng xuất thành công"));
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto request) {
+    public ResponseEntity<APIResponse<Map<String, Object>>> refreshToken(@RequestBody RefreshTokenRequestDto request) {
         try {
             String refreshToken = request.getRefreshToken();
 
             if (!jwtUtil.validateToken(refreshToken)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Refresh token không hợp lệ!"));
+                        .body(APIResponse.error("Refresh token không hợp lệ!"));
             }
-            // Kiểm tra xem refresh token có phải là access token không
+
             String email = jwtUtil.getEmailFromToken(refreshToken);
 
-            // Tìm user và kiểm tra trạng thái
             User user = authService.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
             if (!user.isVerified() || !user.isActive()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Tài khoản không khả dụng"));
+                        .body(APIResponse.error("Tài khoản không khả dụng"));
             }
 
-            // Tạo token mới
             String newAccessToken = jwtUtil.generateTokenFromEmail(email, user.getRole().getRoleName());
             String newRefreshToken = jwtUtil.generateRefreshToken(email);
 
@@ -133,60 +130,57 @@ public class AuthController {
             response.put("tokenType", "Bearer");
             response.put("expiresIn", 3600);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(APIResponse.success(response, "Làm mới token thành công!"));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Không thể làm mới token: " + e.getMessage()));
+                    .body(APIResponse.error("Không thể làm mới token: " + e.getMessage()));
         }
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestParam String otp) {
+    public ResponseEntity<APIResponse<Void>> verifyOtp(@RequestParam String otp) {
         boolean verified = authService.verifyOtp(otp);
         if (verified) {
-            return ResponseEntity.ok(Map.of("message", "Xác thực OTP thành công!"));
+            return ResponseEntity.ok(APIResponse.success(null, "Xác thực OTP thành công!"));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "OTP không hợp lệ hoặc đã hết hạn!"));
+                    .body(APIResponse.error("OTP không hợp lệ hoặc đã hết hạn!"));
         }
     }
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<APIResponse<Void>> forgotPassword(@RequestParam String email) {
         try {
             authService.forgotPassword(email);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Đã gửi OTP đặt lại mật khẩu đến " + email
-            ));
+            return ResponseEntity.ok(APIResponse.success(null, "Đã gửi OTP đặt lại mật khẩu đến " + email));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(APIResponse.error(e.getMessage()));
         }
     }
 
     @PostMapping("/verify-reset-otp")
-    public ResponseEntity<?> verifyResetOtp(@RequestParam String otp) {
+    public ResponseEntity<APIResponse<Void>> verifyResetOtp(@RequestParam String otp) {
         boolean valid = authService.validateResetOtp(otp);
         if (valid) {
-            return ResponseEntity.ok(Map.of("message", "Xác thực OTP thành công! Bây giờ bạn có thể đặt lại mật khẩu."));
+            return ResponseEntity.ok(APIResponse.success(null, "Xác thực OTP thành công! Bạn có thể đặt lại mật khẩu."));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Mã OTP không hợp lệ hoặc đã hết hạn!"));
+                    .body(APIResponse.error("Mã OTP không hợp lệ hoặc đã hết hạn!"));
         }
     }
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam String email,
-                                           @RequestParam String newPassword) {
+    public ResponseEntity<APIResponse<Void>> resetPassword(@RequestParam String email, @RequestParam String newPassword) {
         Optional<User> userOpt = authService.findByEmail(email);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Không tìm thấy người dùng!"));
+                    .body(APIResponse.error("Không tìm thấy người dùng!"));
         }
 
         User user = userOpt.get();
         user.setPassword(authService.encodePassword(newPassword));
         authService.saveUser(user);
 
-        return ResponseEntity.ok(Map.of("message", "Đặt lại mật khẩu thành công!"));
+        return ResponseEntity.ok(APIResponse.success(null, "Đặt lại mật khẩu thành công!"));
     }
 }
