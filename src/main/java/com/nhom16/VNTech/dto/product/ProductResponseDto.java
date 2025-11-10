@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+// Dùng để trả về thông tin chi tiết sản phẩm
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

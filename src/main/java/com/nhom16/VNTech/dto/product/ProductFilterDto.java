@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.dto.product;
 
 import lombok.Data;
-
+// Dùng để lọc sản phẩm theo các tiêu chí khác nhau
 @Data
 public class ProductFilterDto {
     private Long categoryId;
