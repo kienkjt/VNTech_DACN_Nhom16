@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.controller.admin;
 
 import com.nhom16.VNTech.dto.APIResponse;
-import com.nhom16.VNTech.dto.UserDto;
+import com.nhom16.VNTech.dto.user.UserDto;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.AdminService;
 import org.slf4j.Logger;

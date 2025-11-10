@@ -1,6 +1,6 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.UserProfileDto;
+import com.nhom16.VNTech.dto.user.UserProfileDto;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.service.FileUploadService;
