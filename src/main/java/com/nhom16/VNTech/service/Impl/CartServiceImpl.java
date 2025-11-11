@@ -163,12 +163,14 @@ public class CartServiceImpl implements CartService {
             response.setCartItems(CartItemDtos);
 
             // Tính tổng số lượng và tổng giá trị đơn hàng
-            int totalItems = CartItemDtos.stream().mapToInt(CartItemDto::getQuantity).sum();
+            //int quantity = CartItemDtos.stream().mapToInt(CartItemDto::getQuantity).sum(); // Tổng số lượng
+            int totalItems = CartItemDtos.size();
             Long totalPrice = CartItemDtos.stream()
                     .mapToLong(item -> (long) item.getPrice() * item.getQuantity())
                     .sum();
 
             response.setTotalItems(totalItems);
+            //response.setQuantity(quantity);
             response.setTotalPrice(totalPrice);
         } else {
             response.setTotalItems(0);
