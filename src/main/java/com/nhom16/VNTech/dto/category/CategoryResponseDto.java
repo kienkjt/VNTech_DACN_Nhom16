@@ -19,7 +19,4 @@ public class CategoryResponseDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime updatedDate;
-
-    public CategoryResponseDto(Long id, String name) {
-    }
 }

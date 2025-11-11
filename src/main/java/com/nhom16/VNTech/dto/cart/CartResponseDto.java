@@ -15,5 +15,5 @@ public class CartResponseDto {
     List<CartItemDto> cartItems;
     private int totalItems;
     private Long totalPrice;
-    private  int quantity;
+    //private  int quantity;
 }

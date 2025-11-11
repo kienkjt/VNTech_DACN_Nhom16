@@ -95,7 +95,6 @@ public class UserController {
         return ResponseEntity.ok(APIResponse.success(updatedUser, "Tải ảnh đại diện thành công!"));
     }
 
-
     @DeleteMapping("/profile/{userId}/avatar")
     public ResponseEntity<APIResponse<Void>> deleteAvatar(@PathVariable Long userId) throws IOException {
         userService.deleteUserAvatar(userId);
