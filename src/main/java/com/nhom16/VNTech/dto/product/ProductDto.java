@@ -12,6 +12,8 @@ public class ProductDto {
     private Long id;
     private String productName;
     private Long salePrice;
+    private String brand;
+    private String model;
     private int stock;
     private String mainImage;
 }

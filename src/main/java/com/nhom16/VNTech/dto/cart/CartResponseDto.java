@@ -13,6 +13,7 @@ public class CartResponseDto {
     private Long cartId;
     private Long userId;
     List<CartItemDto> cartItems;
+    private int totalItems;
     private Long totalPrice;
     private  int quantity;
 }
