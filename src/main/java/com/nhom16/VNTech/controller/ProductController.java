@@ -1,6 +1,7 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.APIResponse;
+import com.nhom16.VNTech.dto.PageResponse;
 import com.nhom16.VNTech.dto.product.ProductFilterDto;
 import com.nhom16.VNTech.dto.product.ProductResponseDto;
 import com.nhom16.VNTech.service.ProductService;
@@ -18,7 +19,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("")
-    public ResponseEntity<APIResponse<Page<ProductResponseDto>>> getProducts(
+    public ResponseEntity<APIResponse<PageResponse<ProductResponseDto>>> getProducts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) String brand,
@@ -41,7 +42,16 @@ public class ProductController {
         filter.setSortDirection(sortDirection);
 
         Page<ProductResponseDto> products = productService.getProducts(filter);
-        return ResponseEntity.ok(APIResponse.success(products, "Lấy danh sách sản phẩm thành công"));
+
+        PageResponse<ProductResponseDto> response = new PageResponse<>(
+                products.getContent(),
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages()
+        );
+
+        return ResponseEntity.ok(APIResponse.success(response, "Lấy danh sách sản phẩm thành công"));
     }
 
     @GetMapping("/{id}")
