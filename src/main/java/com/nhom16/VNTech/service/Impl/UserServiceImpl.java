@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
         dto.setUsername(user.getUsername());
         dto.setFullName(user.getFullName());
         dto.setGender(user.getGender());
-        dto.setAvatar(user.getAvatar());
+        //dto.setAvatar(user.getAvatar());
         dto.setDateOfBirth(user.getDateOfBirth());
 
         return dto;
