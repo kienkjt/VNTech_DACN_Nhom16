@@ -1,11 +1,9 @@
-package com.nhom16.VNTech.dto;
+package com.nhom16.VNTech.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.nhom16.VNTech.entity.User;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 public class UserProfileDto {

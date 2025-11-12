@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
+// Dùng để nhận dữ liệu khi tạo mới hoặc cập nhật sản phẩm
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

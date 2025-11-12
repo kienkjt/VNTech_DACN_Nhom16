@@ -1,6 +1,7 @@
-package com.nhom16.VNTech.dto;
+package com.nhom16.VNTech.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.nhom16.VNTech.dto.AddressDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.AddressDto;
-import com.nhom16.VNTech.dto.UserDto;
+import com.nhom16.VNTech.dto.user.UserDto;
 import com.nhom16.VNTech.entity.Role;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.repository.RoleRepository;

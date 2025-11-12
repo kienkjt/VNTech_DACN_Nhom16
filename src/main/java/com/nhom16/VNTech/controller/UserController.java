@@ -1,9 +1,8 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.APIResponse;
-import com.nhom16.VNTech.dto.ChangePasswordRequestDto;
-import com.nhom16.VNTech.dto.UserProfileDto;
-import com.nhom16.VNTech.entity.User;
+import com.nhom16.VNTech.dto.user.ChangePasswordRequestDto;
+import com.nhom16.VNTech.dto.user.UserProfileDto;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
