@@ -56,25 +56,25 @@ public class AdminCategoryController {
         }
     }
 
-    @GetMapping("")
-    public ResponseEntity<APIResponse<List<CategoryResponseDto>>> getAllCategories() {
-        try {
-            List<CategoryResponseDto> categories = categoryService.getAllCategories();
-            return ResponseEntity.ok(APIResponse.success(categories, "Lấy danh sách danh mục thành công"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(APIResponse.error("Lỗi khi lấy danh sách danh mục: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<APIResponse<CategoryResponseDto>> getCategoryById(@PathVariable Long id) {
-        try {
-            CategoryResponseDto category = categoryService.getCategoryById(id);
-            return ResponseEntity.ok(APIResponse.success(category, "Lấy thông tin danh mục thành công"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.error("Không tìm thấy danh mục có ID: " + id));
-        }
-    }
+//    @GetMapping("")
+//    public ResponseEntity<APIResponse<List<CategoryResponseDto>>> getAllCategories() {
+//        try {
+//            List<CategoryResponseDto> categories = categoryService.getAllCategories();
+//            return ResponseEntity.ok(APIResponse.success(categories, "Lấy danh sách danh mục thành công"));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(APIResponse.error("Lỗi khi lấy danh sách danh mục: " + e.getMessage()));
+//        }
+//    }
+//
+//    @GetMapping("/{id}")
+//    public ResponseEntity<APIResponse<CategoryResponseDto>> getCategoryById(@PathVariable Long id) {
+//        try {
+//            CategoryResponseDto category = categoryService.getCategoryById(id);
+//            return ResponseEntity.ok(APIResponse.success(category, "Lấy thông tin danh mục thành công"));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(APIResponse.error("Không tìm thấy danh mục có ID: " + id));
+//        }
+//    }
 }
