@@ -1,4 +1,3 @@
-// FileUploadResponseDTO.java
 package com.nhom16.VNTech.dto;
 
 import lombok.AllArgsConstructor;
