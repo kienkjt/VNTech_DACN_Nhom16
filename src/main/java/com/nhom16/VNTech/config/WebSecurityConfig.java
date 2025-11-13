@@ -2,7 +2,6 @@ package com.nhom16.VNTech.config;
 
 import com.nhom16.VNTech.security.JwtAuthenticationFilter;
 import com.nhom16.VNTech.service.Impl.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

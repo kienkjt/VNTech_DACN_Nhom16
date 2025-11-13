@@ -17,10 +17,13 @@ import java.util.Random;
 @Transactional
 public class VerificationTokenServiceImpl implements VerificationTokenService {
 
-    @Autowired
-    private VerificationTokenRepository tokenRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final VerificationTokenRepository tokenRepository;
+    private final UserRepository userRepository;
+
+    public VerificationTokenServiceImpl(VerificationTokenRepository tokenRepository, UserRepository userRepository) {
+        this.tokenRepository = tokenRepository;
+        this.userRepository = userRepository;
+    }
 
     // Tạo OTP mới
     @Transactional

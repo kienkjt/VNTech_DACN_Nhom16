@@ -9,7 +9,6 @@ import com.nhom16.VNTech.repository.RoleRepository;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.repository.VerificationTokenRepository;
 import com.nhom16.VNTech.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,13 +19,28 @@ import java.util.Optional;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired private UserRepository userRepository;
-    @Qualifier("verificationTokenServiceImpl")
-    @Autowired private VerificationTokenService tokenService;
-    @Autowired private VerificationTokenRepository tokenRepository;
-    @Autowired private EmailService emailService;
-    @Autowired private BCryptPasswordEncoder passwordEncoder;
-    @Autowired private RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final VerificationTokenService tokenService;
+    private final VerificationTokenRepository tokenRepository;
+    private final EmailService emailService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+
+    public AuthServiceImpl(
+            UserRepository userRepository,
+            @Qualifier("verificationTokenServiceImpl") VerificationTokenService tokenService,
+            VerificationTokenRepository tokenRepository,
+            EmailService emailService,
+            BCryptPasswordEncoder passwordEncoder,
+            RoleRepository roleRepository
+    ) {
+        this.userRepository = userRepository;
+        this.tokenService = tokenService;
+        this.tokenRepository = tokenRepository;
+        this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+    }
 
     @Override
     public User register(RegistrationRequestDto userDto) {
@@ -34,11 +48,10 @@ public class AuthServiceImpl implements AuthService {
 
         if (existingUserOpt.isPresent()) {
             User existingUser = existingUserOpt.get();
-            // Nếu user đã xác thực
             if (existingUser.isVerified()) {
                 throw new RuntimeException("Email đã được đăng ký!");
             }
-            // Nếu user chưa xác thực => gửi lại OTP
+            // Gửi lại OTP nếu user chưa xác thực
             String otp = tokenService.createVerificationToken(existingUser);
             String subject = "VNTech - Xác thực lại tài khoản của bạn";
             String message = "Xin chào " + existingUser.getUsername() + ",\n\nMã OTP của bạn là: " + otp +
@@ -47,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
             return existingUser;
         }
 
-        // Nếu email chưa tồn tại
+        // Tạo user mới nếu email chưa tồn tại
         User user = new User();
         user.setEmail(userDto.getEmail());
         user.setUsername(userDto.getUsername() != null ? userDto.getUsername() : userDto.getEmail());
