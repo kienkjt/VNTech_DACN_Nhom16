@@ -24,8 +24,13 @@ import java.util.List;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-    @Autowired private UserDetailsServiceImpl userDetailsService;
-    @Autowired private JwtAuthenticationFilter jwtFilter;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtAuthenticationFilter jwtFilter;
+
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthenticationFilter jwtFilter) {
+        this.userDetailsService = userDetailsService;
+        this.jwtFilter = jwtFilter;
+    }
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
