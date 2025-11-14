@@ -5,10 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface AdminService {
+public interface AdminUserService {
     @Transactional
     void  deleteUser(Long id);
-    void changeUserRole(String email, String roleName);
     List<UserDto> getAllUserDtos();
     UserDto getUserDtoById(Long id);
 }

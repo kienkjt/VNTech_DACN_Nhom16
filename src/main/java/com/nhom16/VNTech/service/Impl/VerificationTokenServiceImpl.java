@@ -6,7 +6,6 @@ import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.repository.VerificationTokenRepository;
 import com.nhom16.VNTech.service.VerificationTokenService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

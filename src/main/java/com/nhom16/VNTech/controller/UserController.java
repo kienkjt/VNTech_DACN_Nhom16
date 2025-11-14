@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "${app.frontend.url:http://localhost:3000}")
+@CrossOrigin(origins = "http://localhost:3000")
 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 public class UserController {
 

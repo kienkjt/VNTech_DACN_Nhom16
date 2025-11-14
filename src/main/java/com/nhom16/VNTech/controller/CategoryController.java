@@ -11,11 +11,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/categories")
 @CrossOrigin(origins = "http://localhost:3000")
-public class CategoryPublicController {
+public class CategoryController {
 
     private final CategoryService categoryService;
 
-    public CategoryPublicController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

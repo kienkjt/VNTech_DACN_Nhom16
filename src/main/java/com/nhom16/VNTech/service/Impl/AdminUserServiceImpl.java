@@ -2,11 +2,9 @@ package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.AddressDto;
 import com.nhom16.VNTech.dto.user.UserDto;
-import com.nhom16.VNTech.entity.Role;
 import com.nhom16.VNTech.entity.User;
-import com.nhom16.VNTech.repository.RoleRepository;
 import com.nhom16.VNTech.repository.UserRepository;
-import com.nhom16.VNTech.service.AdminService;
+import com.nhom16.VNTech.service.AdminUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,14 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AdminServiceImpl implements AdminService {
+public class AdminUserServiceImpl implements AdminUserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminUserServiceImpl.class);
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    public AdminServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public AdminUserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
     }
     @Override
     public List<UserDto> getAllUserDtos() {
@@ -49,21 +45,6 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với id: " + id));
         userRepository.delete(user);
         logger.info("Đã xóa người dùng với id: {}", id);
-    }
-    @Transactional
-    @Override
-    public void changeUserRole(String email, String roleName) {
-        logger.info("Thay đổi role cho người dùng: {} thành {}", email, roleName);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
-
-        Role role = roleRepository.findByRoleName(roleName)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy role: " + roleName));
-
-        user.setRole(role);
-        userRepository.save(user);
-        logger.info("Đã cập nhật role cho {}: {}", email, roleName);
     }
     private UserDto convertToUserDto(User user) {
         UserDto dto = new UserDto();

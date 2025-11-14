@@ -3,7 +3,7 @@ package com.nhom16.VNTech.controller.admin;
 import com.nhom16.VNTech.dto.APIResponse;
 import com.nhom16.VNTech.dto.user.UserDto;
 import com.nhom16.VNTech.security.JwtUtil;
-import com.nhom16.VNTech.service.AdminService;
+import com.nhom16.VNTech.service.AdminUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -21,11 +21,11 @@ public class AdminUserController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminUserController.class);
 
-    private final AdminService adminService;
+    private final AdminUserService adminUserService;
     private final JwtUtil jwtUtil;
 
-    public AdminUserController(AdminService adminService, JwtUtil jwtUtil) {
-        this.adminService = adminService;
+    public AdminUserController(AdminUserService adminUserService, JwtUtil jwtUtil) {
+        this.adminUserService = adminUserService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -44,7 +44,7 @@ public class AdminUserController {
             String adminEmail = extractEmailFromHeader(authHeader);
             logger.info("Quản trị viên {} đang lấy danh sách người dùng", adminEmail);
 
-            List<UserDto> users = adminService.getAllUserDtos();
+            List<UserDto> users = adminUserService.getAllUserDtos();
             return ResponseEntity.ok(APIResponse.success(users, "Lấy danh sách người dùng thành công"));
         } catch (Exception ex) {
             logger.error("Lỗi khi lấy danh sách người dùng: {}", ex.getMessage());
@@ -60,7 +60,7 @@ public class AdminUserController {
             String adminEmail = extractEmailFromHeader(authHeader);
             logger.info("Quản trị viên {} đang xem thông tin người dùng id={}", adminEmail, id);
 
-            UserDto user = adminService.getUserDtoById(id);
+            UserDto user = adminUserService.getUserDtoById(id);
             return ResponseEntity.ok(APIResponse.success(user, "Lấy thông tin người dùng thành công"));
         } catch (Exception ex) {
             logger.error("Lỗi khi lấy người dùng id {}: {}", id, ex.getMessage());
@@ -76,7 +76,7 @@ public class AdminUserController {
             String adminEmail = extractEmailFromHeader(authHeader);
             logger.info("Quản trị viên {} yêu cầu xóa người dùng id={}", adminEmail, id);
 
-            adminService.deleteUser(id);
+            adminUserService.deleteUser(id);
             return ResponseEntity.ok(APIResponse.success(null,
                     "Quản trị viên " + adminEmail + " đã xóa người dùng có id: " + id));
         } catch (Exception ex) {
@@ -85,27 +85,4 @@ public class AdminUserController {
         }
     }
 
-    public static class ChangeRoleRequest {
-        private String role;
-        public String getRole() { return role; }
-        public void setRole(String role) { this.role = role; }
-    }
-
-    @PutMapping("/users/{email}/role")
-    public ResponseEntity<APIResponse<Void>> changeUserRole(
-            @RequestHeader("Authorization") String authHeader,
-            @PathVariable String email,
-            @RequestBody ChangeRoleRequest request) {
-        try {
-            String adminEmail = extractEmailFromHeader(authHeader);
-            logger.info("Quản trị viên {} thay đổi role của {} thành {}", adminEmail, email, request.getRole());
-
-            adminService.changeUserRole(email, request.getRole());
-            return ResponseEntity.ok(APIResponse.success(null,
-                    "Quản trị viên " + adminEmail + " đã cập nhật vai trò mới cho: " + email));
-        } catch (Exception ex) {
-            logger.error("Lỗi khi cập nhật role cho {}: {}", email, ex.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(ex.getMessage()));
-        }
-    }
 }

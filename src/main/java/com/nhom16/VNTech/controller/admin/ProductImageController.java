@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/products/{productId}/images")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "${app.frontend.url:http://localhost:3000}")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProductImageController {
 
     private final ProductImageService productImageService;
