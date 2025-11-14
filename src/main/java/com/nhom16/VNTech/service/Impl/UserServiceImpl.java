@@ -74,6 +74,7 @@ public class UserServiceImpl implements UserService {
 
     private UserProfileDto convertToUserProfileDto(User user) {
         UserProfileDto dto = new UserProfileDto();
+        dto.setId(user.getId());
         dto.setEmail(user.getEmail());
         dto.setUsername(user.getUsername());
         dto.setFullName(user.getFullName());
