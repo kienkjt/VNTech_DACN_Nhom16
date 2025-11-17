@@ -51,7 +51,7 @@ public class Order {
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
-    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL)
     private Payment payment;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -105,7 +105,7 @@ public class Order {
         if (!this.status.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
                     String.format("Không thể chuyển từ trạng thái %s sang %s",
-                            this.status.getVietnameseName(), newStatus.getVietnameseName())
+                            this.status.getName(), newStatus.getName())
             );
         }
         this.status = newStatus;
