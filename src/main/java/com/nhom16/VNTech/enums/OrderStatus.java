@@ -15,15 +15,14 @@ public enum OrderStatus {
     RETURNED("Đã trả hàng", "Đơn hàng đã được trả lại"),
     REFUNDED("Đã hoàn tiền", "Đơn hàng đã được hoàn tiền");
 
-    private final String vietnameseName;
+    private final String name;
     private final String description;
 
-    OrderStatus(String vietnameseName, String description) {
-        this.vietnameseName = vietnameseName;
+    OrderStatus(String name, String description) {
+        this.name = name;
         this.description = description;
     }
 
-    // Chuyển đổi từ string sang enum
     public static OrderStatus fromString(String status) {
         if (status == null) return null;
         try {
