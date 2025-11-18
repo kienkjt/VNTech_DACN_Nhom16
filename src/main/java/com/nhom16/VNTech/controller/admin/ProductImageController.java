@@ -1,10 +1,14 @@
 package com.nhom16.VNTech.controller.admin;
 
+import com.beust.jcommander.Parameter;
 import com.nhom16.VNTech.dto.APIResponse;
 import com.nhom16.VNTech.dto.product.ProductImageResponseDto;
 import com.nhom16.VNTech.service.ProductImageService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,11 +24,15 @@ public class ProductImageController {
 
     private final ProductImageService productImageService;
 
-    @PostMapping("")
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<ProductImageResponseDto>> uploadProductImage(
             @PathVariable Long productId,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "isMain", defaultValue = "false") boolean isMain) {
+            @RequestPart("file")
+            @Schema(type = "string", format = "binary", description = "Chọn file ảnh sản phẩm")
+            MultipartFile file,
+            @RequestParam(value = "isMain", defaultValue = "false")
+            boolean isMain
+    ) {
         try {
             ProductImageResponseDto response = productImageService.uploadProductImage(productId, file, isMain);
             return ResponseEntity.status(HttpStatus.CREATED)
