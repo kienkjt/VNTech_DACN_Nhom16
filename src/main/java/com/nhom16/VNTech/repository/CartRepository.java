@@ -15,8 +15,13 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<Cart> findByUserId(Long userId);
 
-    @Query("SELECT c FROM Cart c LEFT JOIN FETCH c.cartItems ci LEFT JOIN FETCH ci.products WHERE c.user.id = :userId")
-    Optional<Cart> findByUserIdWithItems(@Param("userId") Long userId); // Tìm giỏ hàng theo userId và lấy kèm các cartItems và products
+    @Query("""
+        SELECT DISTINCT c FROM Cart c
+        LEFT JOIN FETCH c.cartItems ci
+        LEFT JOIN FETCH ci.products
+        WHERE c.user.id = :userId
+    """)
+    Optional<Cart> findByUserIdWithItems(@Param("userId") Long userId);
 
-    boolean existsByUserId(Long userId); // Kiểm tra giỏ hàng có tồn tại cho userId không
+    boolean existsByUserId(Long userId);
 }

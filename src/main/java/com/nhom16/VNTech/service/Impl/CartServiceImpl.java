@@ -17,11 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
@@ -30,180 +29,153 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
 
     @Override
-    //@Transactional(readOnly = true)
-    @Transactional
     public CartResponseDto getCartByUserId(Long userId) {
         Cart cart = getOrCreateCart(userId);
-        return convertToCartResponseDto(cart);
+
+        Cart cartWithItems = cartRepository.findByUserIdWithItems(userId).orElse(cart);
+
+        return convertToCartResponseDto(cartWithItems);
     }
 
     @Override
-    @Transactional
     public CartResponseDto addToCart(Long userId, AddToCartRequestDto request) {
-        // Kiểm tra xem sản phẩm có tồn tại hay không
+
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + request.getProductId()));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-        // Kiểm tra số lượng tồn kho
         if (product.getStock() < request.getQuantity()) {
-            throw new RuntimeException("Số lượng sản phẩm trong kho không đủ. Hiện có: " + product.getStock());
+            throw new RuntimeException("Số lượng không đủ trong kho");
         }
 
         Cart cart = getOrCreateCart(userId);
 
-        // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng hay chưa
-        Optional<CartItem> existingItem = cartItemRepository.findByCartAndProducts(cart, product);
+        CartItem item = cartItemRepository
+                .findByCartAndProducts(cart, product)
+                .orElse(null);
 
-        if (existingItem.isPresent()) {
-            // Nếu đã có trong giỏ hàng thì cập nhật số lượng
-            CartItem cartItem = existingItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity());
-            cartItemRepository.save(cartItem);
+        if (item == null) {
+            item = new CartItem();
+            item.setCart(cart);
+            item.setProducts(product);
+            item.setQuantity(request.getQuantity());
+            item.setPrice(product.getSalePrice().intValue());
         } else {
-            // Nếu chưa có thì thêm mới vào giỏ hàng
-            CartItem cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setProducts(product);
-            cartItem.setQuantity(request.getQuantity());
-            cartItem.setPrice(product.getSalePrice().intValue());
-
-            cartItemRepository.save(cartItem);
+            item.setQuantity(item.getQuantity() + request.getQuantity());
         }
 
-        // Lấy lại giỏ hàng sau khi đã được cập nhật
-        Cart updatedCart = cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng"));
+        cartItemRepository.save(item);
 
-        return convertToCartResponseDto(updatedCart);
+        return getCartByUserId(userId);
     }
 
     @Override
-    @Transactional
     public CartResponseDto updateCartItem(Long userId, Long itemId, UpdateCartItemRequestDto request) {
-        CartItem cartItem = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ với ID: " + itemId));
 
-        // Kiểm tra xem mục giỏ hàng có thuộc về người dùng hiện tại không
-        if (!cartItem.getCart().getUser().getId().equals(userId)) {
-            throw new RuntimeException("Sản phẩm này không thuộc giỏ hàng của người dùng");
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy mục trong giỏ"));
+
+        if (!item.getCart().getUser().getId().equals(userId)) {
+            throw new RuntimeException("Không thuộc quyền sở hữu người dùng");
         }
 
-        // Kiểm tra tồn kho
-        if (cartItem.getProducts().getStock() < request.getQuantity()) {
-            throw new RuntimeException("Số lượng tồn kho không đủ. Hiện có: " + cartItem.getProducts().getStock());
-        }
-
-        // Nếu người dùng nhập số lượng <= 0 thì xóa khỏi giỏ hàng
-        if (request.getQuantity() <= 0) {
-            cartItemRepository.delete(cartItem);
+        if (request.getQuantity() == 0) {
+            cartItemRepository.delete(item);
+        } else if (item.getProducts().getStock() < request.getQuantity()) {
+            throw new RuntimeException("Không đủ số lượng kho");
         } else {
-            cartItem.setQuantity(request.getQuantity());
-            cartItemRepository.save(cartItem);
+            item.setQuantity(request.getQuantity());
+            cartItemRepository.save(item);
         }
 
-        Cart updatedCart = cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng"));
-
-        return convertToCartResponseDto(updatedCart);
+        return getCartByUserId(userId);
     }
 
     @Override
-    @Transactional
     public void removeCartItem(Long userId, Long itemId) {
-        CartItem cartItem = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ với ID: " + itemId));
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy item"));
 
-        // Kiểm tra xem sản phẩm trong giỏ có thuộc về người dùng không
-        if (!cartItem.getCart().getUser().getId().equals(userId)) {
-            throw new RuntimeException("Sản phẩm trong giỏ không thuộc về người dùng");
+        if (!item.getCart().getUser().getId().equals(userId)) {
+            throw new RuntimeException("Không hợp lệ");
         }
 
-        cartItemRepository.delete(cartItem);
+        cartItemRepository.delete(item);
     }
 
     @Override
-    @Transactional
     public void clearCart(Long userId) {
-        // Xóa toàn bộ sản phẩm trong giỏ hàng của người dùng
         Cart cart = getOrCreateCart(userId);
-        cartItemRepository.deleteByCart(cart);
+        cartItemRepository.deleteAllByCart(cart);
     }
 
     @Override
     @Transactional(readOnly = true)
     public int getCartItemCount(Long userId) {
-        // Trả về tổng số sản phẩm trong giỏ hàng
-        Cart cart = getOrCreateCart(userId);
-        return cart.getCartItems() != null ? cart.getCartItems().size() : 0;
+        return cartRepository.findByUserIdWithItems(userId)
+                .map(cart -> cart.getCartItems().size())
+                .orElse(0);
     }
 
-    // Lấy giỏ hàng của người dùng, nếu chưa có thì tự tạo mới
     private Cart getOrCreateCart(Long userId) {
-        return cartRepository.findByUserIdWithItems(userId)
+        return cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
-                    Cart newCart = new Cart();
-                    newCart.setUser(user);
-                    return cartRepository.save(newCart);
+                    Cart cart = new Cart();
+                    cart.setUser(user);
+                    return cartRepository.save(cart);
                 });
     }
 
-    // Chuyển đổi thực thể giỏ hàng sang DTO trả về cho người dùng
     private CartResponseDto convertToCartResponseDto(Cart cart) {
-        CartResponseDto response = new CartResponseDto();
-        response.setCartId(cart.getId());
-        response.setUserId(cart.getUser().getId());
+        CartResponseDto dto = new CartResponseDto();
+        dto.setCartId(cart.getId());
+        dto.setUserId(cart.getUser().getId());
 
-        if (cart.getCartItems() != null) {
-            List<CartItemDto> CartItemDtos = cart.getCartItems().stream()
-                    .map(this::convertToCartItemDto)
-                    .collect(Collectors.toList());
-            response.setCartItems(CartItemDtos);
+        List<CartItemDto> items = cart.getCartItems().stream()
+                .map(this::convertToCartItemDto)
+                .toList();
 
-            // Tính tổng số lượng và tổng giá trị đơn hàng
-            //int quantity = CartItemDtos.stream().mapToInt(CartItemDto::getQuantity).sum(); // Tổng số lượng
-            int totalItems = CartItemDtos.size();
-            Long totalPrice = CartItemDtos.stream()
-                    .mapToLong(item -> (long) item.getPrice() * item.getQuantity())
-                    .sum();
+        dto.setCartItems(items);
+        dto.setTotalItems(items.size());
+        dto.setTotalPrice(
+                items.stream()
+                        .mapToLong(i -> (long) i.getPrice() * i.getQuantity())
+                        .sum()
+        );
 
-            response.setTotalItems(totalItems);
-            //response.setQuantity(quantity);
-            response.setTotalPrice(totalPrice);
-        } else {
-            response.setTotalItems(0);
-            response.setTotalPrice(0L);
-        }
-
-        return response;
+        return dto;
     }
-    private CartItemDto convertToCartItemDto(CartItem cartItem) {
+
+    private CartItemDto convertToCartItemDto(CartItem item) {
         CartItemDto dto = new CartItemDto();
-        dto.setId(cartItem.getId());
-        dto.setQuantity(cartItem.getQuantity());
-        dto.setPrice(cartItem.getPrice());
 
-        Product product = cartItem.getProducts();
-        ProductDto productDto = new ProductDto();
-        productDto.setId(product.getId());
-        productDto.setProductName(product.getProductName());
-        productDto.setSalePrice(product.getSalePrice());
-        productDto.setBrand(product.getBrand());
-        productDto.setModel(product.getModel());
-        productDto.setStock(product.getStock());
+        dto.setId(item.getId());
+        dto.setQuantity(item.getQuantity());
+        dto.setPrice(item.getPrice());
 
-        if (product.getImages() != null && !product.getImages().isEmpty()) {
-            String mainImage = product.getImages().stream()
+        Product p = item.getProducts();
+        ProductDto pd = new ProductDto();
+
+        pd.setId(p.getId());
+        pd.setProductName(p.getProductName());
+        pd.setSalePrice(p.getSalePrice());
+        pd.setBrand(p.getBrand());
+        pd.setModel(p.getModel());
+        pd.setStock(p.getStock());
+
+        if (!p.getImages().isEmpty()) {
+            String mainImg = p.getImages().stream()
                     .filter(ProductImage::isMain)
                     .map(ProductImage::getImageUrl)
                     .findFirst()
-                    .orElse(product.getImages().get(0).getImageUrl()); // Nếu không có hình chính, lấy hình đầu tiên
-            productDto.setMainImage(mainImage);
+                    .orElse(p.getImages().get(0).getImageUrl());
+
+            pd.setMainImage(mainImg);
         }
 
-        dto.setProduct(productDto);
+        dto.setProduct(pd);
         return dto;
     }
 }
