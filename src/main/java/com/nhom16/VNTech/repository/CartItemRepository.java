@@ -14,15 +14,15 @@ import java.util.Optional;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     Optional<CartItem> findByCartAndProducts(Cart cart, Product product);
-    Optional<CartItem> findByCart(Cart cart);
-    @Query("SELECT ci FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.products.id = :productId")
-    Optional<CartItem> findCartItemByCartIdAndProductId(@Param("cartId") Long cartId,@Param("productId") Long productId);
 
-    void deleteByCart(Cart cart); // Xóa tất cả CartItem dựa trên Cart
+    void deleteAllByCart(Cart cart);
 
     @Modifying
-    @Query("DELETE FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.products.id = :productId")
-    void deleteByCartIdAndProductId(@Param("cartId") Long cartId, @Param("productId") Long productId); // Xóa CartItem dựa trên cartId và productId
-
-    boolean existsByCartAndProducts(Cart cart, Product product);
+    @Query("""
+        DELETE FROM CartItem ci 
+        WHERE ci.cart.id = :cartId 
+        AND ci.products.id = :productId
+    """)
+    void deleteByCartIdAndProductId(@Param("cartId") Long cartId,
+                                    @Param("productId") Long productId);
 }
