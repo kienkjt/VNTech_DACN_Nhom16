@@ -52,7 +52,9 @@ public class WebSecurityConfig {
                                 "/reset-password",
                                 "/products/**",
                                 "/categories/**",
-                                "/cart/**"
+                                "/cart/**",
+                                "/swagger-ui/**",
+                                "/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
