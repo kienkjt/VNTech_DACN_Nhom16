@@ -19,7 +19,7 @@ public class JwtUtil {
     @Value("${jwt.expiration-ms}")
     private long jwtExpirationMs;
 
-    @Value("${jwt.refresh-expiration-ms:86400000}") // 24 giờ mặc định
+    @Value("${jwt.refresh-expiration-ms}")
     private long refreshExpirationMs;
 
     private Key getSigningKey() {
