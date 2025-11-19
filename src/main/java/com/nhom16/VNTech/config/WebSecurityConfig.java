@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.config;
 
+import com.nhom16.VNTech.security.AuthEntryPointJwt;
 import com.nhom16.VNTech.security.JwtAuthenticationFilter;
 import com.nhom16.VNTech.service.Impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -20,10 +21,14 @@ public class WebSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationFilter jwtFilter;
+    private final AuthEntryPointJwt unauthorizedHandler;
 
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthenticationFilter jwtFilter) {
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
+                             JwtAuthenticationFilter jwtFilter,
+                             AuthEntryPointJwt unauthorizedHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
+        this.unauthorizedHandler = unauthorizedHandler;
     }
 
     @Bean
@@ -40,6 +45,8 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -54,6 +61,8 @@ public class WebSecurityConfig {
                                 "/categories/**",
                                 "/cart/**",
                                 "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
                                 "/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")

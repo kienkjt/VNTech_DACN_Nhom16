@@ -5,13 +5,18 @@ import com.nhom16.VNTech.dto.user.ChangePasswordRequestDto;
 import com.nhom16.VNTech.dto.user.UserProfileDto;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -86,10 +91,19 @@ public class UserController {
 
         return ResponseEntity.ok(APIResponse.success(null, "Cập nhật hồ sơ thành công!"));
     }
-    @PostMapping("/profile/{userId}/avatar")
+    @PostMapping(value = "/profile/{userId}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<UserProfileDto>> uploadAvatar(
             @PathVariable Long userId,
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @Parameter(
+                    description = "Chọn file ảnh đại diện",
+                    required = true,
+                    content = @Content(
+                            mediaType = "multipart/form-data",
+                            schema = @Schema(type = "string", format = "binary")
+                    )
+            )
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
 
         UserProfileDto updatedUser = userService.updateUserAvatar(userId, file);
         return ResponseEntity.ok(APIResponse.success(updatedUser, "Tải ảnh đại diện thành công!"));
