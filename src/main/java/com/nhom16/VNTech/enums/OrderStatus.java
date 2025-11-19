@@ -51,12 +51,10 @@ public enum OrderStatus {
         };
     }
 
-    // Kiểm tra xem đơn hàng có thể hủy không
     public boolean canBeCancelled() {
         return this == PENDING || this == CONFIRMED || this == PROCESSING;
     }
 
-    // Kiểm tra xem đơn hàng đã hoàn thành chưa
     public boolean isCompleted() {
         return this == DELIVERED || this == CANCELLED || this == REFUNDED;
     }
