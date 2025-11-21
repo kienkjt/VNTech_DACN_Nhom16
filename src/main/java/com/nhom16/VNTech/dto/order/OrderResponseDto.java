@@ -1,7 +1,9 @@
 package com.nhom16.VNTech.dto.order;
 
 import com.nhom16.VNTech.dto.AddressDto;
-import com.nhom16.VNTech.dto.user.UserProfileDto;
+import com.nhom16.VNTech.dto.PaymentDto;
+import com.nhom16.VNTech.dto.user.UserOrderDto;
+import com.nhom16.VNTech.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,9 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderResponseDto {
-    private String orderId;
+    private Long id;
     private String orderCode;
-    private UserProfileDto user;
+    private OrderStatus status;
+    private String statusName;
+    private String statusDescription;
     private int totalPrice;
     private int shippingFee;
     private int discount;
@@ -23,9 +27,16 @@ public class OrderResponseDto {
     private String note;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime confirmedAt;
+    private LocalDateTime processingAt;
+    private LocalDateTime shippingAt;
+    private LocalDateTime deliveredAt;
     private LocalDateTime cancelledAt;
     private String cancelReason;
+    private UserOrderDto user;
     private AddressDto address;
+    private PaymentDto payment;
     private List<OrderItemDto> orderItems;
-//    private PaymentDto payment;
+    private boolean canBeCancelled;
+    private List<OrderStatus> nextPossibleStatuses;
 }

@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderStatusUpdateDto {
     private String status;
-    private String note;
+    private String cancelReason;
 }

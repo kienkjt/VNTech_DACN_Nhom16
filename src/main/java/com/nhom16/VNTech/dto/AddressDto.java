@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class AddressDto {
-    private Long id;             // Nếu null => là địa chỉ mới
+    private Long id;
     private String recipientName;
     private String phoneNumber;
     private String province;
