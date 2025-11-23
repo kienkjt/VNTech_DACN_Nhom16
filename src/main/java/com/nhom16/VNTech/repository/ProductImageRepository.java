@@ -1,4 +1,3 @@
-// ProductImageRepository.java
 package com.nhom16.VNTech.repository;
 
 import com.nhom16.VNTech.entity.ProductImage;

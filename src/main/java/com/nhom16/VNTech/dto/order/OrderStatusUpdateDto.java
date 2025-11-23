@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.dto.order;
 
+import com.nhom16.VNTech.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderStatusUpdateDto {
-    private String status;
+    private OrderStatus status;;
     private String cancelReason;
 }

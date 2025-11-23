@@ -71,7 +71,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 a.setDistrict(address.getDistrict());
                 a.setWard(address.getWard());
                 a.setAddressDetail(address.getAddressDetail());
-                a.setDefault(address.isDefault());
+                a.setIsDefault(address.isDefault());
                 return a;
             }).collect(Collectors.toList()));
         }
