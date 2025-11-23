@@ -60,6 +60,7 @@ public class WebSecurityConfig {
                                 "/products/**",
                                 "/categories/**",
                                 "/cart/**",
+                                "/address/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
