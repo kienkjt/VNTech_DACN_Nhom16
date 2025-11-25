@@ -79,7 +79,7 @@ public class AuthController {
             response.put("accessToken", accessToken);
             response.put("refreshToken", refreshToken);
             response.put("tokenType", "Bearer");
-            response.put("expiresIn", 3600); // 1 giờ
+            response.put("expiresIn", 604800000); // 7 ngày
             response.put("role", user.getRole().getRoleName());
 
             return ResponseEntity.ok(APIResponse.success(response, "Đăng nhập thành công!"));
