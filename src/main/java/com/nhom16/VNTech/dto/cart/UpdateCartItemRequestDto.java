@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateCartItemRequestDto {
     private int quantity;
+    private Boolean selected;
 }

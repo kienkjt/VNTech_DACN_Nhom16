@@ -1,6 +1,5 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.*;
 import com.nhom16.VNTech.dto.cart.AddToCartRequestDto;
 import com.nhom16.VNTech.dto.cart.CartItemDto;
 import com.nhom16.VNTech.dto.cart.CartResponseDto;
@@ -70,7 +69,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartResponseDto updateCartItem(Long userId, Long itemId, UpdateCartItemRequestDto request) {
-
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy mục trong giỏ"));
 
@@ -78,18 +76,37 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("Không thuộc quyền sở hữu người dùng");
         }
 
+        if (request.getQuantity() > 0) {
+            if (item.getProducts().getStock() < request.getQuantity()) {
+                throw new RuntimeException("Không đủ số lượng kho");
+            }
+            item.setQuantity(request.getQuantity());
+        }
+
+        if (request.getSelected() != null) {
+            item.setSelected(request.getSelected());
+        }
+
         if (request.getQuantity() == 0) {
             cartItemRepository.delete(item);
-        } else if (item.getProducts().getStock() < request.getQuantity()) {
-            throw new RuntimeException("Không đủ số lượng kho");
         } else {
-            item.setQuantity(request.getQuantity());
             cartItemRepository.save(item);
         }
 
         return getCartByUserId(userId);
     }
-
+    @Override
+    public CartResponseDto updateSelectedItems(Long userId, List<Long> itemIds, boolean selected) {
+        List<CartItem> items = cartItemRepository.findAllById(itemIds);
+        for (CartItem item : items) {
+            if (!item.getCart().getUser().getId().equals(userId)) {
+                throw new RuntimeException("Không thuộc quyền sở hữu người dùng");
+            }
+            item.setSelected(selected);
+        }
+        cartItemRepository.saveAll(items);
+        return getCartByUserId(userId);
+    }
     @Override
     public void removeCartItem(Long userId, Long itemId) {
         CartItem item = cartItemRepository.findById(itemId)
@@ -137,10 +154,22 @@ public class CartServiceImpl implements CartService {
                 .map(this::convertToCartItemDto)
                 .toList();
 
+        List<CartItemDto> selectedItems = items.stream()
+                .filter(CartItemDto::isSelected)
+                .toList();
+
         dto.setCartItems(items);
         dto.setTotalItems(items.size());
+        dto.setSelectedItems(selectedItems.size());
+
         dto.setTotalPrice(
                 items.stream()
+                        .mapToLong(i -> (long) i.getPrice() * i.getQuantity())
+                        .sum()
+        );
+
+        dto.setSelectedItemsPrice(
+                selectedItems.stream()
                         .mapToLong(i -> (long) i.getPrice() * i.getQuantity())
                         .sum()
         );
@@ -154,6 +183,7 @@ public class CartServiceImpl implements CartService {
         dto.setId(item.getId());
         dto.setQuantity(item.getQuantity());
         dto.setPrice(item.getPrice());
+        dto.setSelected(item.isSelected());
 
         Product p = item.getProducts();
         ProductDto pd = new ProductDto();
