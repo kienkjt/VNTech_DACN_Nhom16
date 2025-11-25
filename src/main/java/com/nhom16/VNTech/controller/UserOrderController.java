@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("user/orders")
 @CrossOrigin(origins = "http://localhost:3000")
 @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 public class UserOrderController {
