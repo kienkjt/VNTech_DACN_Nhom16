@@ -9,13 +9,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     Optional<CartItem> findByCartAndProducts(Cart cart, Product product);
 
-    void deleteAllByCart(Cart cart);
+    List<CartItem> findByCart(Cart cart);
+
+    @Modifying
+    @Query("DELETE FROM CartItem ci WHERE ci.cart = :cart")
+    void deleteAllByCart(@Param("cart") Cart cart);
 
     @Modifying
     @Query("""
@@ -25,4 +30,9 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     """)
     void deleteByCartIdAndProductId(@Param("cartId") Long cartId,
                                     @Param("productId") Long productId);
+
+    @Query("SELECT ci FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.products.id = :productId")
+    Optional<CartItem> findByCartIdAndProductId(@Param("cartId") Long cartId, @Param("productId") Long productId);
+
+    boolean existsByCartAndProducts(Cart cart, Product product);
 }
