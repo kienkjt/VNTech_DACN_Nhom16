@@ -2,6 +2,7 @@ package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.APIResponse;
 import com.nhom16.VNTech.dto.cart.AddToCartRequestDto;
+import com.nhom16.VNTech.dto.cart.CartItemDto;
 import com.nhom16.VNTech.dto.cart.CartResponseDto;
 import com.nhom16.VNTech.dto.cart.UpdateCartItemRequestDto;
 import com.nhom16.VNTech.security.JwtUtil;
@@ -12,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/cart")
@@ -89,5 +93,30 @@ public class CartController {
         Long userId = extractUserIdFromRequest(request);
         int count = cartService.getCartItemCount(userId);
         return ResponseEntity.ok(APIResponse.success(count, "Lấy số lượng sản phẩm trong giỏ hàng thành công"));
+    }
+
+    @PutMapping("/items/select")
+    public ResponseEntity<APIResponse<CartResponseDto>> updateSelectedItems(
+            HttpServletRequest request,
+            @RequestParam List<Long> itemIds,
+            @RequestParam boolean selected) {
+
+        Long userId = extractUserIdFromRequest(request);
+        CartResponseDto cart = cartService.updateSelectedItems(userId, itemIds, selected);
+        return ResponseEntity.ok(APIResponse.success(cart, selected ? "Đã chọn sản phẩm" : "Đã bỏ chọn sản phẩm"));
+    }
+
+    @GetMapping("/selected-items")
+    public ResponseEntity<APIResponse<List<CartItemDto>>> getSelectedItems(
+            HttpServletRequest request) {
+
+        Long userId = extractUserIdFromRequest(request);
+        CartResponseDto cart = cartService.getCartByUserId(userId);
+
+        List<CartItemDto> selectedItems = cart.getCartItems().stream()
+                .filter(CartItemDto::isSelected)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(APIResponse.success(selectedItems, "Lấy sản phẩm đã chọn thành công"));
     }
 }

@@ -17,6 +17,8 @@ public class CartItem {
     private int quantity;
     private int price;
 
+    private boolean selected = true;
+
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;

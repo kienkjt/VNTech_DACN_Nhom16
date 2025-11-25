@@ -12,5 +12,6 @@ public class CartItemDto {
     private Long id;
     private int quantity;
     private double price;
+    private  boolean selected;
     private ProductDto product;
 }
