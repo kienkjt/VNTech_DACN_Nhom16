@@ -5,7 +5,6 @@ import com.nhom16.VNTech.dto.user.ChangePasswordRequestDto;
 import com.nhom16.VNTech.dto.user.UserProfileDto;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
