@@ -28,7 +28,7 @@ public class ProductMapper {
         dto.setQuantitySold(product.getQuantitySold());
         dto.setBrand(product.getBrand());
         dto.setModel(product.getModel());
-        dto.setRating(product.getRating());
+        dto.setRating((int) product.getRating());
         dto.setOrigin(product.getOrigin());
         dto.setCreatedAt(product.getCreatedAt());
         dto.setUpdatedAt(product.getUpdatedAt());
