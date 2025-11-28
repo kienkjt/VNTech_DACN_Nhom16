@@ -25,7 +25,7 @@ public class Product {
     private int quantitySold;
     private String brand;
     private String model;
-    private int rating;
+    private double rating;
     private String origin;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
