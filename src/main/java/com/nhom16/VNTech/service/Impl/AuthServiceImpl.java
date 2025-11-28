@@ -9,6 +9,7 @@ import com.nhom16.VNTech.repository.RoleRepository;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.repository.VerificationTokenRepository;
 import com.nhom16.VNTech.service.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,10 +54,7 @@ public class AuthServiceImpl implements AuthService {
             }
             // Gửi lại OTP nếu user chưa xác thực
             String otp = tokenService.createVerificationToken(existingUser);
-            String subject = "VNTech - Xác thực lại tài khoản của bạn";
-            String message = "Xin chào " + existingUser.getUsername() + ",\n\nMã OTP của bạn là: " + otp +
-                    "\nMã có hiệu lực trong 2 phút.\n\nCảm ơn bạn đã đăng ký tại VNTech.";
-            emailService.sendEmail(existingUser.getEmail(), subject, message);
+            sendVerificationEmail(existingUser, otp, "Xác thực lại tài khoản của bạn");
             return existingUser;
         }
 
@@ -74,10 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Gửi OTP xác thực
         String otp = tokenService.createVerificationToken(user);
-        String subject = "VNTech - Xác thực tài khoản của bạn";
-        String message = "Xin chào " + user.getUsername() + ",\n\nMã OTP của bạn là: " + otp +
-                "\nMã có hiệu lực trong 2 phút.\n\nCảm ơn bạn đã đăng ký tại VNTech.";
-        emailService.sendEmail(user.getEmail(), subject, message);
+        sendVerificationEmail(user, otp, "Xác thực tài khoản của bạn");
 
         return user;
     }
@@ -144,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
             tokenRepository.delete(token);
             return false;
         }
-        return true; // chỉ xác nhận hợp lệ, không set verified
+        return true;
     }
 
     @Override
@@ -160,5 +155,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void saveUser(User user) {
         userRepository.save(user);
+    }
+
+    private void sendVerificationEmail(User user, String otp, String subjectPrefix) {
+        String subject = "VNTech - " + subjectPrefix;
+        String message = "Xin chào " + user.getUsername() + ",\n\nMã OTP của bạn là: " + otp +
+                "\nMã có hiệu lực trong 2 phút.\n\nCảm ơn bạn đã đăng ký tại VNTech.";
+        emailService.sendEmail(user.getEmail(), subject, message);
     }
 }

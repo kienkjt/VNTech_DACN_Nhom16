@@ -4,9 +4,11 @@ import com.nhom16.VNTech.dto.AddressDto;
 import com.nhom16.VNTech.dto.AddressRequestDto;
 import com.nhom16.VNTech.entity.Address;
 import com.nhom16.VNTech.entity.User;
+import com.nhom16.VNTech.mapper.AddressMapper;
 import com.nhom16.VNTech.repository.AddressRepository;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.service.AddressService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,26 +19,20 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
+    private final AddressMapper addressMapper;
     private final org.springframework.web.client.RestTemplate restTemplate;
-
-    public AddressServiceImpl(AddressRepository addressRepository,
-                              UserRepository userRepository,
-                              org.springframework.web.client.RestTemplate restTemplate) {
-        this.addressRepository = addressRepository;
-        this.userRepository = userRepository;
-        this.restTemplate = restTemplate;
-    }
 
     @Override
     @Transactional(readOnly = true)
     public List<AddressDto> getAddressesByUserId(Long userId) {
         List<Address> addresses = addressRepository.findByUserId(userId);
         return addresses.stream()
-                .map(this::convertToDto)
+                .map(addressMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -61,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
         address.setCreatedAt(LocalDateTime.now());
 
         Address savedAddress = addressRepository.save(address);
-        return convertToDto(savedAddress);
+        return addressMapper.toDto(savedAddress);
     }
 
     @Override
@@ -86,7 +82,7 @@ public class AddressServiceImpl implements AddressService {
         address.setUpdatedAt(LocalDateTime.now());
 
         Address updatedAddress = addressRepository.save(address);
-        return convertToDto(updatedAddress);
+        return addressMapper.toDto(updatedAddress);
     }
 
     @Override
@@ -114,13 +110,13 @@ public class AddressServiceImpl implements AddressService {
         address.setUpdatedAt(LocalDateTime.now());
 
         Address updatedAddress = addressRepository.save(address);
-        return convertToDto(updatedAddress);
+        return addressMapper.toDto(updatedAddress);
     }
 
     @Override
     public Optional<AddressDto> getDefaultAddress(Long userId) {
         return addressRepository.findByUserIdAndIsDefaultTrue(userId)
-                .map(this::convertToDto);
+                .map(addressMapper::toDto);
     }
 
     private void unsetDefaultAddresses(Long userId) {
@@ -134,23 +130,8 @@ public class AddressServiceImpl implements AddressService {
         }
     }
 
-    private AddressDto convertToDto(Address address) {
-        AddressDto dto = new AddressDto();
-        dto.setId(address.getId());
-        dto.setRecipientName(address.getRecipientName());
-        dto.setPhoneNumber(address.getPhoneNumber());
-        dto.setProvince(address.getProvince());
-        dto.setDistrict(address.getDistrict());
-        dto.setWard(address.getWard());
-        dto.setAddressDetail(address.getAddressDetail());
-        dto.setIsDefault(address.isDefault());
-        return dto;
-    }
-
-    // Các method hiện có cho provinces, districts, wards (giữ nguyên)
     @Override
     public List<java.util.Map<String, Object>> getAllProvinces() {
-        // implementation từ AddressServiceImpl hiện tại
         String url = "https://vn-public-apis.fpo.vn/provinces/getAll?limit=-1";
         return fetchListFromApi(url);
     }

@@ -1,11 +1,10 @@
 package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.cart.AddToCartRequestDto;
-import com.nhom16.VNTech.dto.cart.CartItemDto;
 import com.nhom16.VNTech.dto.cart.CartResponseDto;
 import com.nhom16.VNTech.dto.cart.UpdateCartItemRequestDto;
-import com.nhom16.VNTech.dto.product.ProductDto;
 import com.nhom16.VNTech.entity.*;
+import com.nhom16.VNTech.mapper.CartMapper;
 import com.nhom16.VNTech.repository.CartItemRepository;
 import com.nhom16.VNTech.repository.CartRepository;
 import com.nhom16.VNTech.repository.ProductRepository;
@@ -26,19 +25,17 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CartMapper cartMapper;
 
     @Override
     public CartResponseDto getCartByUserId(Long userId) {
         Cart cart = getOrCreateCart(userId);
-
         Cart cartWithItems = cartRepository.findByUserIdWithItems(userId).orElse(cart);
-
-        return convertToCartResponseDto(cartWithItems);
+        return cartMapper.toCartResponseDto(cartWithItems);
     }
 
     @Override
     public CartResponseDto addToCart(Long userId, AddToCartRequestDto request) {
-
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
@@ -95,6 +92,7 @@ public class CartServiceImpl implements CartService {
 
         return getCartByUserId(userId);
     }
+
     @Override
     public CartResponseDto updateSelectedItems(Long userId, List<Long> itemIds, boolean selected) {
         List<CartItem> items = cartItemRepository.findAllById(itemIds);
@@ -107,6 +105,7 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.saveAll(items);
         return getCartByUserId(userId);
     }
+
     @Override
     public void removeCartItem(Long userId, Long itemId) {
         CartItem item = cartItemRepository.findById(itemId)
@@ -143,69 +142,5 @@ public class CartServiceImpl implements CartService {
                     cart.setUser(user);
                     return cartRepository.save(cart);
                 });
-    }
-
-    private CartResponseDto convertToCartResponseDto(Cart cart) {
-        CartResponseDto dto = new CartResponseDto();
-        dto.setCartId(cart.getId());
-        dto.setUserId(cart.getUser().getId());
-
-        List<CartItemDto> items = cart.getCartItems().stream()
-                .map(this::convertToCartItemDto)
-                .toList();
-
-        List<CartItemDto> selectedItems = items.stream()
-                .filter(CartItemDto::isSelected)
-                .toList();
-
-        dto.setCartItems(items);
-        dto.setTotalItems(items.size());
-        dto.setSelectedItems(selectedItems.size());
-
-        dto.setTotalPrice(
-                items.stream()
-                        .mapToLong(i -> (long) i.getPrice() * i.getQuantity())
-                        .sum()
-        );
-
-        dto.setSelectedItemsPrice(
-                selectedItems.stream()
-                        .mapToLong(i -> (long) i.getPrice() * i.getQuantity())
-                        .sum()
-        );
-
-        return dto;
-    }
-
-    private CartItemDto convertToCartItemDto(CartItem item) {
-        CartItemDto dto = new CartItemDto();
-
-        dto.setId(item.getId());
-        dto.setQuantity(item.getQuantity());
-        dto.setPrice(item.getPrice());
-        dto.setSelected(item.isSelected());
-
-        Product p = item.getProducts();
-        ProductDto pd = new ProductDto();
-
-        pd.setId(p.getId());
-        pd.setProductName(p.getProductName());
-        pd.setSalePrice(p.getSalePrice());
-        pd.setBrand(p.getBrand());
-        pd.setModel(p.getModel());
-        pd.setStock(p.getStock());
-
-        if (!p.getImages().isEmpty()) {
-            String mainImg = p.getImages().stream()
-                    .filter(ProductImage::isMain)
-                    .map(ProductImage::getImageUrl)
-                    .findFirst()
-                    .orElse(p.getImages().get(0).getImageUrl());
-
-            pd.setMainImage(mainImg);
-        }
-
-        dto.setProduct(pd);
-        return dto;
     }
 }

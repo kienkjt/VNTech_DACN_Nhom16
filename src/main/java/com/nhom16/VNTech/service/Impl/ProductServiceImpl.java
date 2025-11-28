@@ -1,8 +1,11 @@
 package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.product.*;
-import com.nhom16.VNTech.dto.category.CategoryResponseDto;
-import com.nhom16.VNTech.entity.*;
+import com.nhom16.VNTech.entity.Category;
+import com.nhom16.VNTech.entity.Product;
+import com.nhom16.VNTech.entity.ProductImage;
+import com.nhom16.VNTech.entity.ProductSpecification;
+import com.nhom16.VNTech.mapper.ProductMapper;
 import com.nhom16.VNTech.repository.CategoryRepository;
 import com.nhom16.VNTech.repository.ProductRepository;
 import com.nhom16.VNTech.service.ProductService;
@@ -24,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductMapper productMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -33,7 +37,6 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> products;
 
         if (hasMultipleFilters(filter)) {
-            // Sử dụng filter tổng hợp
             products = productRepository.findProductsWithFilters(
                     filter.getCategoryId(),
                     filter.getProductName(),
@@ -43,11 +46,10 @@ public class ProductServiceImpl implements ProductService {
                     pageable
             );
         } else {
-            // Sử dụng filter đơn giản
             products = applySimpleFilters(filter, pageable);
         }
 
-        return products.map(this::convertToDTO);
+        return products.map(productMapper::toProductResponseDto);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto getProductById(Long id) {
         Product product = productRepository.findByIdWithCategory(id)
                 .orElseThrow(() -> new RuntimeException("Không có sản phẩm với id: " + id));
-        return convertToDTO(product);
+        return productMapper.toProductResponseDto(product);
     }
 
     @Override
@@ -68,20 +70,18 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = buildProductEntity(request, category);
 
-        // Thêm images nếu có
         if (request.getImages() != null && !request.getImages().isEmpty()) {
             List<ProductImage> images = buildProductImages(request.getImages(), product);
             product.setImages(images);
         }
 
-        // Thêm specifications nếu có
         if (request.getSpecifications() != null && !request.getSpecifications().isEmpty()) {
             List<ProductSpecification> specifications = buildProductSpecifications(request.getSpecifications(), product);
             product.setSpecifications(specifications);
         }
 
         Product savedProduct = productRepository.save(product);
-        return convertToDTO(savedProduct);
+        return productMapper.toProductResponseDto(savedProduct);
     }
 
     @Override
@@ -94,21 +94,17 @@ public class ProductServiceImpl implements ProductService {
 
         updateProductEntity(existingProduct, request);
 
-        // Cập nhật category nếu có thay đổi
         if (!existingProduct.getCategory().getId().equals(request.getCategoryId())) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Không có danh mục với id: " + request.getCategoryId()));
             existingProduct.setCategory(category);
         }
 
-        // Cập nhật images (xóa cũ, thêm mới)
         updateProductImages(existingProduct, request.getImages());
-
-        // Cập nhật specifications (xóa cũ, thêm mới)
         updateProductSpecifications(existingProduct, request.getSpecifications());
 
         Product updatedProduct = productRepository.save(existingProduct);
-        return convertToDTO(updatedProduct);
+        return productMapper.toProductResponseDto(updatedProduct);
     }
 
     @Override
@@ -135,7 +131,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // ========== PRIVATE HELPER METHODS ==========
-    // Tạo Pageable từ ProductFilterDto
     private Pageable createPageable(ProductFilterDto filter) {
         Sort.Direction direction = "desc".equalsIgnoreCase(filter.getSortDirection())
                 ? Sort.Direction.DESC
@@ -207,26 +202,14 @@ public class ProductServiceImpl implements ProductService {
 
     private List<ProductImage> buildProductImages(List<ProductImageDto> imageDTOs, Product product) {
         return imageDTOs.stream()
-                .map(imageDTO -> {
-                    ProductImage image = new ProductImage();
-                    image.setImageUrl(imageDTO.getImageUrl());
-                    image.setMain(imageDTO.isMain());
-                    image.setProducts(product);
-                    return image;
-                })
+                .map(dto -> productMapper.toProductImageEntity(dto, product))
                 .collect(Collectors.toList());
     }
 
     private List<ProductSpecification> buildProductSpecifications(
             List<ProductSpecificationDto> specDTOs, Product product) {
         return specDTOs.stream()
-                .map(specDTO -> {
-                    ProductSpecification spec = new ProductSpecification();
-                    spec.setKeyName(specDTO.getKeyName());
-                    spec.setValue(specDTO.getValue());
-                    spec.setProducts(product);
-                    return spec;
-                })
+                .map(dto -> productMapper.toProductSpecificationEntity(dto, product))
                 .collect(Collectors.toList());
     }
 
@@ -248,56 +231,5 @@ public class ProductServiceImpl implements ProductService {
                 product.getSpecifications().addAll(newSpecs);
             }
         }
-    }
-
-    private ProductResponseDto convertToDTO(Product product) {
-        ProductResponseDto dto = new ProductResponseDto();
-        dto.setId(product.getId());
-        dto.setProductName(product.getProductName());
-        dto.setDescription(product.getDescription());
-        dto.setOriginalPrice(product.getOriginalPrice());
-        dto.setSalePrice(product.getSalePrice());
-        dto.setStock(product.getStock());
-        dto.setQuantitySold(product.getQuantitySold());
-        dto.setBrand(product.getBrand());
-        dto.setModel(product.getModel());
-        dto.setRating(product.getRating());
-        dto.setOrigin(product.getOrigin());
-        dto.setCreatedAt(product.getCreatedAt());
-        dto.setUpdatedAt(product.getUpdatedAt());
-
-        // Category
-        if (product.getCategory() != null) {
-            dto.setCategory(new CategoryResponseDto(
-                    product.getCategory().getId(),
-                    product.getCategory().getName(),
-                    product.getCategory().getCreatedAt(),
-                    product.getCategory().getUpdatedAt()
-            ));
-        }
-
-        // Images
-        if (product.getImages() != null && !product.getImages().isEmpty()) {
-            List<ProductImageDto> imageDTOs = product.getImages().stream()
-                    .map(image -> new ProductImageDto(
-                            image.getImageUrl(),
-                            image.isMain()
-                    ))
-                    .collect(Collectors.toList());
-            dto.setImages(imageDTOs);
-        }
-
-        // Specifications
-        if (product.getSpecifications() != null && !product.getSpecifications().isEmpty()) {
-            List<ProductSpecificationDto> specDTOs = product.getSpecifications().stream()
-                    .map(spec -> new ProductSpecificationDto(
-                            spec.getKeyName(),
-                            spec.getValue()
-                    ))
-                    .collect(Collectors.toList());
-            dto.setSpecifications(specDTOs);
-        }
-
-        return dto;
     }
 }
