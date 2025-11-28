@@ -2,12 +2,13 @@ package com.nhom16.VNTech.service.Impl;
 
 import com.nhom16.VNTech.dto.user.UserProfileDto;
 import com.nhom16.VNTech.entity.User;
+import com.nhom16.VNTech.mapper.UserMapper;
 import com.nhom16.VNTech.repository.UserRepository;
 import com.nhom16.VNTech.service.FileUploadService;
 import com.nhom16.VNTech.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -26,12 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final FileUploadService fileUploadService;
-
-    public UserServiceImpl(FileUploadService fileUploadService, BCryptPasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.fileUploadService = fileUploadService;
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
-    }
+    private final UserMapper userMapper;
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -40,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public boolean changePassword(String email, String oldPassword, String newPassword,String confirmPassword) {
+    public boolean changePassword(String email, String oldPassword, String newPassword, String confirmPassword) {
         if (!newPassword.equals(confirmPassword)) {
             logger.warn("Mật khẩu mới và xác nhận mật khẩu không khớp cho {}", email);
             return false;
@@ -69,20 +66,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserProfileDto> getProfileByEmail(String email) {
-        return userRepository.findByEmail(email).map(this::convertToUserProfileDto);
-    }
-
-    private UserProfileDto convertToUserProfileDto(User user) {
-        UserProfileDto dto = new UserProfileDto();
-        dto.setId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setUsername(user.getUsername());
-        dto.setFullName(user.getFullName());
-        dto.setGender(user.getGender());
-        dto.setAvatar(user.getAvatar());
-        dto.setDateOfBirth(user.getDateOfBirth());
-
-        return dto;
+        return userRepository.findByEmail(email)
+                .map(userMapper::toUserProfileDto);
     }
 
     @Override
@@ -93,47 +78,35 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
-        user.setUsername(profileDto.getUsername());
-        user.setFullName(profileDto.getFullName());
-        user.setGender(profileDto.getGender());
-        user.setDateOfBirth(profileDto.getDateOfBirth());
-        user.setAvatar(profileDto.getAvatar());
+        userMapper.updateUserFromProfileDto(profileDto, user);
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
         logger.info("Cập nhật profile thành công cho: {}", email);
     }
+
     @Override
     @Transactional
     public UserProfileDto updateUserAvatar(Long userId, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không có người dùng với id: " + userId));
 
-        // Upload ảnh mới trước
         Map uploadResult = fileUploadService.uploadUserAvatar(file, userId);
         String avatarUrl = uploadResult.get("secure_url").toString();
-
-        // Nếu có avatar cũ, xóa sau khi upload thành công
-        if (user.getAvatar() != null) {
-            // String publicId = extractPublicId(user.getAvatar());
-            // fileUploadService.deleteImage(publicId);
-        }
 
         user.setAvatar(avatarUrl);
         userRepository.save(user);
 
-        // Trả về DTO (ẩn password, role, ... )
-        return convertToUserProfileDto(user);
+        return userMapper.toUserProfileDto(user);
     }
-
 
     @Override
     @Transactional
     public void deleteUserAvatar(Long userId) throws IOException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không có người dùng với "));
+                .orElseThrow(() -> new RuntimeException("Không có người dùng với id: " + userId));
+
         if (user.getAvatar() != null) {
-            // Trich xuất publicId từ URL hoặc lưu trữ riêng biệt
             user.setAvatar(null);
             userRepository.save(user);
         }

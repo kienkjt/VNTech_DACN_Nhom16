@@ -3,8 +3,10 @@ package com.nhom16.VNTech.service.Impl;
 import com.nhom16.VNTech.dto.category.CategoryRequestDto;
 import com.nhom16.VNTech.dto.category.CategoryResponseDto;
 import com.nhom16.VNTech.entity.Category;
+import com.nhom16.VNTech.mapper.CategoryMapper;
 import com.nhom16.VNTech.repository.CategoryRepository;
 import com.nhom16.VNTech.service.CategoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,12 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    public CategoryServiceImpl(CategoryRepository categoryRepository){
-        this.categoryRepository = categoryRepository;
-    }
+    private final CategoryMapper categoryMapper;
+
     @Override
     public CategoryResponseDto createCategory(CategoryRequestDto dto) {
         if (dto.getCategoryName() == null || dto.getCategoryName().trim().isEmpty()) {
@@ -31,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setCreatedAt(LocalDateTime.now());
         categoryRepository.save(category);
 
-        return mapToDto(category);
+        return categoryMapper.toCategoryResponseDto(category);
     }
 
     @Override
@@ -48,7 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setUpdatedAt(LocalDateTime.now());
         categoryRepository.save(category);
 
-        return mapToDto(category);
+        return categoryMapper.toCategoryResponseDto(category);
     }
 
     @Override
@@ -67,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         return categories.stream()
-                .map(this::mapToDto)
+                .map(categoryMapper::toCategoryResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -77,15 +79,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục với id: " + id));
 
-        return mapToDto(category);
-    }
-
-    private CategoryResponseDto mapToDto(Category category) {
-        CategoryResponseDto dto = new CategoryResponseDto();
-        dto.setId(category.getId());
-        dto.setCategoryName(category.getName());
-        dto.setCreatedDate(category.getCreatedAt());
-        dto.setUpdatedDate(category.getUpdatedAt());
-        return dto;
+        return categoryMapper.toCategoryResponseDto(category);
     }
 }
