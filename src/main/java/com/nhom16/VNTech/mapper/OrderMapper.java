@@ -9,6 +9,7 @@ import com.nhom16.VNTech.entity.Product;
 import com.nhom16.VNTech.entity.ProductImage;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.entity.Address;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +17,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class OrderMapper {
 
-    @Autowired
-    private AddressMapper addressMapper;
+    private final AddressMapper addressMapper;
 
     public OrderResponseDto toOrderResponseDto(Order order) {
         if (order == null) return null;
