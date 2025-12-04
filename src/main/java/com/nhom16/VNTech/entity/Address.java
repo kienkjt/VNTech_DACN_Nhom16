@@ -36,6 +36,14 @@ public class Address {
     @JsonIgnore
     private User user;
 
-     @OneToMany(mappedBy = "address")
-     private List<Order> orders;
+    @OneToMany(mappedBy = "address")
+    private List<Order> orders;
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean aDefault) {
+        isDefault = aDefault;
+    }
 }

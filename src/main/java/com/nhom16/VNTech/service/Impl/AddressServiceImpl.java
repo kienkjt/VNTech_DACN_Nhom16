@@ -1,7 +1,8 @@
 package com.nhom16.VNTech.service.Impl;
 
-import com.nhom16.VNTech.dto.AddressDto;
-import com.nhom16.VNTech.dto.AddressRequestDto;
+import com.nhom16.VNTech.dto.address.AddressDto;
+import com.nhom16.VNTech.dto.address.AddressRequestDto;
+import com.nhom16.VNTech.dto.address.AddressUpdateRequestDto;
 import com.nhom16.VNTech.entity.Address;
 import com.nhom16.VNTech.entity.User;
 import com.nhom16.VNTech.mapper.AddressMapper;
@@ -52,7 +53,7 @@ public class AddressServiceImpl implements AddressService {
         address.setDistrict(addressDto.getDistrict());
         address.setWard(addressDto.getWard());
         address.setAddressDetail(addressDto.getAddressDetail());
-        address.setDefault(addressDto.isDefault());
+        address.setIsDefault(addressDto.isDefault());
         address.setUser(user);
         address.setCreatedAt(LocalDateTime.now());
 
@@ -61,16 +62,12 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDto updateAddress(Long userId, Long addressId, AddressRequestDto addressDto) {
+    public AddressDto updateAddress(Long userId, Long addressId, AddressUpdateRequestDto addressDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
         Address address = addressRepository.findByIdAndUser(addressId, user)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ"));
-
-        if (addressDto.isDefault() && !address.isDefault()) {
-            unsetDefaultAddresses(userId);
-        }
 
         address.setRecipientName(addressDto.getRecipientName());
         address.setPhoneNumber(addressDto.getPhoneNumber());
@@ -78,7 +75,6 @@ public class AddressServiceImpl implements AddressService {
         address.setDistrict(addressDto.getDistrict());
         address.setWard(addressDto.getWard());
         address.setAddressDetail(addressDto.getAddressDetail());
-        address.setDefault(addressDto.isDefault());
         address.setUpdatedAt(LocalDateTime.now());
 
         Address updatedAddress = addressRepository.save(address);
@@ -106,7 +102,7 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepository.findByIdAndUser(addressId, user)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ"));
 
-        address.setDefault(true);
+        address.setIsDefault(true);
         address.setUpdatedAt(LocalDateTime.now());
 
         Address updatedAddress = addressRepository.save(address);
@@ -125,7 +121,7 @@ public class AddressServiceImpl implements AddressService {
                 .collect(Collectors.toList());
 
         for (Address addr : defaultAddresses) {
-            addr.setDefault(false);
+            addr.setIsDefault(false);
             addressRepository.save(addr);
         }
     }

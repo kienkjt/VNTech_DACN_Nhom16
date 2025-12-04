@@ -1,6 +1,6 @@
 package com.nhom16.VNTech.dto.order;
 
-import com.nhom16.VNTech.dto.AddressDto;
+import com.nhom16.VNTech.dto.address.AddressDto;
 import com.nhom16.VNTech.dto.PaymentDto;
 import com.nhom16.VNTech.dto.user.UserOrderDto;
 import com.nhom16.VNTech.enums.OrderStatus;
