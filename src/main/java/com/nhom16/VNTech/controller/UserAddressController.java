@@ -1,8 +1,9 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.APIResponse;
-import com.nhom16.VNTech.dto.AddressDto;
-import com.nhom16.VNTech.dto.AddressRequestDto;
+import com.nhom16.VNTech.dto.address.AddressDto;
+import com.nhom16.VNTech.dto.address.AddressRequestDto;
+import com.nhom16.VNTech.dto.address.AddressUpdateRequestDto;
 import com.nhom16.VNTech.security.JwtUtil;
 import com.nhom16.VNTech.service.AddressService;
 import com.nhom16.VNTech.service.UserService;
@@ -67,7 +68,7 @@ public class UserAddressController {
     public ResponseEntity<APIResponse<AddressDto>> updateAddress(
             HttpServletRequest request,
             @PathVariable Long addressId,
-            @Valid @RequestBody AddressRequestDto addressDto) {
+            @Valid @RequestBody AddressUpdateRequestDto addressDto) {
         Long userId = extractUserIdFromRequest(request);
         AddressDto updatedAddress = addressService.updateAddress(userId, addressId, addressDto);
         return ResponseEntity.ok(APIResponse.success(updatedAddress, "Cập nhật địa chỉ thành công"));

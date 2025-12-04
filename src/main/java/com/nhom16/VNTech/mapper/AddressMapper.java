@@ -1,6 +1,6 @@
 package com.nhom16.VNTech.mapper;
 
-import com.nhom16.VNTech.dto.AddressDto;
+import com.nhom16.VNTech.dto.address.AddressDto;
 import com.nhom16.VNTech.entity.Address;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class AddressMapper {
         address.setDistrict(dto.getDistrict());
         address.setWard(dto.getWard());
         address.setAddressDetail(dto.getAddressDetail());
-        address.setDefault(dto.getIsDefault());
+        address.setIsDefault(dto.getIsDefault());
         return address;
     }
 }
