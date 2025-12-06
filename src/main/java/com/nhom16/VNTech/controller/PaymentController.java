@@ -24,7 +24,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final OrderService orderService;
-
+    // Tạo yêu cầu thanh toán
     @PostMapping("/create")
     public ResponseEntity<?> createPayment(
             @Valid @RequestBody PaymentRequestDto paymentRequest,
@@ -59,7 +59,7 @@ public class PaymentController {
             );
         }
     }
-
+    // Xác nhận đơn hàng COD
     @PostMapping("/cod/{orderId}/confirm")
     public ResponseEntity<?> confirmCodOrder(@PathVariable Long orderId) {
         try {
@@ -73,7 +73,7 @@ public class PaymentController {
             );
         }
     }
-
+    // Xử lý kết quả thanh toán từ VNPAY
     @GetMapping("/vnpay-return")
     public ResponseEntity<?> paymentReturn(HttpServletRequest request) {
         try {
@@ -96,7 +96,7 @@ public class PaymentController {
             );
         }
     }
-
+    // Xử lý IPN từ VNPAY
     @GetMapping("/vnpay-ipn")
     public ResponseEntity<?> paymentIPN(HttpServletRequest request) {
         try {
