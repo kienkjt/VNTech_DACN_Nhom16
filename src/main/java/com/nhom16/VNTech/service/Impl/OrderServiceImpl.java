@@ -3,6 +3,8 @@ package com.nhom16.VNTech.service.Impl;
 import com.nhom16.VNTech.dto.order.*;
 import com.nhom16.VNTech.entity.*;
 import com.nhom16.VNTech.enums.OrderStatus;
+import com.nhom16.VNTech.enums.PaymentMethod;
+import com.nhom16.VNTech.enums.PaymentStatus;
 import com.nhom16.VNTech.mapper.OrderMapper;
 import com.nhom16.VNTech.repository.*;
 import com.nhom16.VNTech.service.OrderService;
@@ -27,6 +29,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final OrderMapper orderMapper;
+    private final PaymentRepository paymentRepository;
 
     @Override
     @Transactional
@@ -44,45 +47,75 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Giỏ hàng trống");
         }
 
+        // Convert payment method String -> Enum
+        PaymentMethod paymentMethod = PaymentMethod.fromString(request.getPaymentMethod());
+
+        // Tạo Order
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
         order.setStatus(OrderStatus.PENDING);
         order.setNote(request.getNote());
 
+        // Convert CartItem -> OrderItem
         List<OrderItem> orderItems = cart.getCartItems().stream().map(ci -> {
-            Product p = ci.getProducts();
-            OrderItem oi = new OrderItem();
-            oi.setProducts(p);
-            oi.setQuantity(ci.getQuantity());
-            oi.setPrice(ci.getPrice());
-            oi.setOrders(order);
-            return oi;
+            OrderItem item = new OrderItem();
+            item.setProducts(ci.getProducts());
+            item.setQuantity(ci.getQuantity());
+            item.setPrice(ci.getPrice());
+            item.setOrders(order);
+            return item;
         }).collect(Collectors.toList());
 
-        int total = orderItems.stream().mapToInt(oi -> oi.getPrice() * oi.getQuantity()).sum();
+        // Tính tổng tiền sản phẩm
+        int total = orderItems.stream()
+                .mapToInt(oi -> oi.getPrice() * oi.getQuantity())
+                .sum();
         order.setTotalPrice(total);
 
         int shippingFee = 30000;
         order.setShippingFee(shippingFee);
 
         int discount = 0;
-        if (request.getCouponCode() != null && request.getCouponCode().equalsIgnoreCase("DISCOUNT10")) {
+        if ("DISCOUNT10".equalsIgnoreCase(request.getCouponCode())) {
             discount = (int) (total * 0.1);
         }
         order.setDiscount(discount);
 
+        // Tính finalPrice
         order.calculateFinalPrice();
 
-        Order saved = orderRepository.save(order);
+        // Lưu Order
+        Order savedOrder = orderRepository.save(order);
 
-        orderItems.forEach(oi -> oi.setOrders(saved));
+        // Lưu OrderItems
+        orderItems.forEach(i -> i.setOrders(savedOrder));
         orderItemRepository.saveAll(orderItems);
+
+        Payment payment = new Payment();
+        payment.setOrders(savedOrder);
+        payment.setAmount(savedOrder.getFinalPrice());
+        payment.setPaymentMethod(paymentMethod);
+
+        if (paymentMethod == PaymentMethod.COD) {
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setNote("Thanh toán khi nhận hàng");
+
+            savedOrder.changeStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(savedOrder);
+
+        } else if (paymentMethod == PaymentMethod.VNPAY) {
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setNote("Chờ thanh toán qua VNPay");
+        }
+
+        paymentRepository.save(payment);
 
         cartItemRepository.deleteAllByCart(cart);
 
-        return orderMapper.toOrderResponseDto(saved);
+        return orderMapper.toOrderResponseDto(savedOrder);
     }
+
 
     @Override
     public OrderResponseDto getOrderById(Long orderId, Long userId) {
@@ -188,5 +221,28 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderMapper::toOrderResponseDto)
                 .collect(Collectors.toList());
         return new PageImpl<>(dtos, pageable, orders.size());
+    }
+
+    @Override
+    @Transactional
+    public void updateOrderPaymentStatus(Long orderId, String paymentStatus) {
+        try {
+            PaymentStatus status = PaymentStatus.fromString(paymentStatus);
+            Payment payment = paymentRepository.findByOrdersId(orderId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin thanh toán"));
+
+            payment.setStatus(status);
+            paymentRepository.save(payment);
+
+            if (status == PaymentStatus.PAID) {
+                Order order = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
+                order.changeStatus(OrderStatus.CONFIRMED);
+                orderRepository.save(order);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi cập nhật trạng thái thanh toán: " + e.getMessage());
+        }
     }
 }
