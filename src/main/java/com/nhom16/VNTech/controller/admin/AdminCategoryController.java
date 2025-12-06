@@ -34,12 +34,14 @@ public class AdminCategoryController {
     public ResponseEntity<APIResponse<CategoryResponseDto>> updateCategory(
             @PathVariable Long id,
             @RequestBody CategoryRequestDto dto) {
+
         try {
             CategoryResponseDto updated = categoryService.updateCategory(id, dto);
             return ResponseEntity.ok(APIResponse.success(updated, "Cập nhật danh mục thành công"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.error("Không tìm thấy danh mục có ID: " + id));
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.error("Không tìm thấy danh mục với ID: " + id));
         }
     }
 
@@ -49,8 +51,9 @@ public class AdminCategoryController {
             categoryService.deleteCategory(id);
             return ResponseEntity.ok(APIResponse.success(null, "Xóa danh mục thành công"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.error("Xóa thất bại: Không tìm thấy danh mục có ID: " + id));
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.error("Không tìm thấy danh mục với ID: " + id));
         }
     }
 }

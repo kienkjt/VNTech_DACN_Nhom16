@@ -21,4 +21,5 @@ public interface OrderService {
     Page<OrderResponseDto> getAllOrders(Pageable pageable);
     List<OrderResponseDto> getAllOrders();
     Page<OrderResponseDto> getOrdersByStatus(OrderStatus status, Pageable pageable);
+    void updateOrderPaymentStatus(Long orderId, String paymentStatus);
 }
