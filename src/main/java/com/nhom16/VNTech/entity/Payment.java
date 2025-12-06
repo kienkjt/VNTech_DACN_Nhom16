@@ -51,7 +51,7 @@ public class Payment {
 
     private String note;
 
-    @Column(name = "paid_at")
+    @Column(name = "paid_at", nullable = true)
     private LocalDateTime paidAt;
 
     @Column(name = "created_at", nullable = false)
