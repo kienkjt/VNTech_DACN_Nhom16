@@ -106,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
         String otp = tokenService.createVerificationToken(user);
 
         String subject = "VNTech - Xác nhận quên mật khẩu";
-        String message = "Xin chào " + user.getUsername() + ",\n\nMã OTP đặt lại mật khẩu của bạn là: " + otp +
+        String message = "Xin chào " + user.getEmail() + ",\n\nMã OTP đặt lại mật khẩu của bạn là: " + otp +
                 "\nMã có hiệu lực trong 2 phút.\n\nNếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.";
 
         emailService.sendEmail(user.getEmail(), subject, message);
@@ -159,7 +159,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void sendVerificationEmail(User user, String otp, String subjectPrefix) {
         String subject = "VNTech - " + subjectPrefix;
-        String message = "Xin chào " + user.getUsername() + ",\n\nMã OTP của bạn là: " + otp +
+        String message = "Xin chào " + user.getEmail() + ",\n\nMã OTP của bạn là: " + otp +
                 "\nMã có hiệu lực trong 2 phút.\n\nCảm ơn bạn đã đăng ký tại VNTech.";
         emailService.sendEmail(user.getEmail(), subject, message);
     }
