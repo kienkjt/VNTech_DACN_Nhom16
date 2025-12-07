@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/reviews")
+@RequestMapping("/user/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 

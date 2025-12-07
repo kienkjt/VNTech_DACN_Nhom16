@@ -1,6 +1,7 @@
 package com.nhom16.VNTech.entity;
 
 import com.nhom16.VNTech.enums.OrderStatus;
+import com.nhom16.VNTech.enums.PaymentMethod; // Thêm import
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +30,10 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false)
+    private PaymentMethod paymentMethod;
 
     private int totalPrice;
     private int shippingFee;
@@ -63,6 +68,9 @@ public class Order {
         updatedAt = LocalDateTime.now();
         if (orderCode == null) {
             orderCode = "ORD" + System.currentTimeMillis();
+        }
+        if (paymentMethod == null) {
+            paymentMethod = PaymentMethod.COD;
         }
     }
 
@@ -110,5 +118,9 @@ public class Order {
         }
         this.status = newStatus;
         updateTimestamps();
+    }
+
+    public boolean isCodPayment() {
+        return this.paymentMethod == PaymentMethod.COD;
     }
 }

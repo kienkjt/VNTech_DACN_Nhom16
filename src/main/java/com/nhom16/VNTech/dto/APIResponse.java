@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class APIResponse<T> {
     private boolean success;
     private String message;
@@ -16,7 +16,15 @@ public class APIResponse<T> {
         return new APIResponse<>(true, message, data);
     }
 
+    public static <T> APIResponse<T> success(T data) {
+        return new APIResponse<>(true, "Thành công", data);
+    }
+
     public static <T> APIResponse<T> error(String message) {
         return new APIResponse<>(false, message, null);
+    }
+
+    public static <T> APIResponse<T> error(String message, T data) {
+        return new APIResponse<>(false, message, data);
     }
 }
