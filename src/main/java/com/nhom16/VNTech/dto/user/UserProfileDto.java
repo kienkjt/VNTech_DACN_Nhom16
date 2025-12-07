@@ -9,7 +9,7 @@ import java.util.Date;
 public class UserProfileDto {
     private Long id;
     private String email;
-    private String username;
+//    private String username;
     private String fullName;
     private String gender;
     private  String avatar;

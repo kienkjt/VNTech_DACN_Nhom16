@@ -61,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
         // Tạo user mới nếu email chưa tồn tại
         User user = new User();
         user.setEmail(userDto.getEmail());
-        user.setUsername(userDto.getUsername() != null ? userDto.getUsername() : userDto.getEmail());
+//        user.setUsername(userDto.getUsername() != null ? userDto.getUsername() : userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setVerified(false);
         Role defaultRole = roleRepository.findByRoleName("USER")

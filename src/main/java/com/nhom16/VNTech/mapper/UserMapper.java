@@ -20,7 +20,7 @@ public class UserMapper {
 
         UserDto dto = new UserDto();
         dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
+//        dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
         dto.setGender(user.getGender());
@@ -49,7 +49,7 @@ public class UserMapper {
         UserProfileDto dto = new UserProfileDto();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
-        dto.setUsername(user.getUsername());
+//        dto.setUsername(user.getUsername());
         dto.setFullName(user.getFullName());
         dto.setGender(user.getGender());
         dto.setAvatar(user.getAvatar());
@@ -62,7 +62,7 @@ public class UserMapper {
             return;
         }
 
-        user.setUsername(profileDto.getUsername());
+//        user.setUsername(profileDto.getUsername());
         user.setFullName(profileDto.getFullName());
         user.setGender(profileDto.getGender());
         user.setDateOfBirth(profileDto.getDateOfBirth());

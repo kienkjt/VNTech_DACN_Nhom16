@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserDto {
     private Long id;
-    private String username;
+//    private String username;
     private String email;
     private String fullName;
     private String gender;

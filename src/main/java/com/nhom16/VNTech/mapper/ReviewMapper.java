@@ -31,7 +31,7 @@ public class ReviewMapper {
 
         ReviewUserDto dto = new ReviewUserDto();
         dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
+//        dto.setUsername(user.getUsername());
         dto.setFullName(user.getFullName());
         dto.setAvatar(user.getAvatar());
         return dto;

@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class ReviewUserDto {
     private Long id;
-    private String username;
+//    private String username;
     private String fullName;
     private String avatar;
 }
