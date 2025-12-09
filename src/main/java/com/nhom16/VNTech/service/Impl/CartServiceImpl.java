@@ -28,19 +28,18 @@ public class CartServiceImpl implements CartService {
     private final CartMapper cartMapper;
 
     @Override
-    public CartResponseDto getCartByUserId(Long userId) {
-        Cart cart = getOrCreateCart(userId);
-        Cart cartWithItems = cartRepository.findByUserIdWithItems(userId).orElse(cart);
-        return cartMapper.toCartResponseDto(cartWithItems);
-    }
-
-    @Override
     public CartResponseDto addToCart(Long userId, AddToCartRequestDto request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
+        if (request.getQuantity() <= 0) {
+            throw new RuntimeException("Số lượng phải lớn hơn 0");
+        }
+
         if (product.getStock() < request.getQuantity()) {
-            throw new RuntimeException("Số lượng không đủ trong kho");
+            throw new RuntimeException(
+                    String.format("Số lượng không đủ trong kho. Chỉ còn %d sản phẩm", product.getStock())
+            );
         }
 
         Cart cart = getOrCreateCart(userId);
@@ -55,12 +54,19 @@ public class CartServiceImpl implements CartService {
             item.setProducts(product);
             item.setQuantity(request.getQuantity());
             item.setPrice(product.getSalePrice().intValue());
+            item.setSelected(true);
         } else {
-            item.setQuantity(item.getQuantity() + request.getQuantity());
+            int newQuantity = item.getQuantity() + request.getQuantity();
+            if (newQuantity > product.getStock()) {
+                throw new RuntimeException(
+                        String.format("Số lượng không đủ trong kho. Tổng số lượng không được vượt quá %d (hiện có: %d, muốn thêm: %d)",
+                                product.getStock(), item.getQuantity(), request.getQuantity())
+                );
+            }
+            item.setQuantity(newQuantity);
         }
 
         cartItemRepository.save(item);
-
         return getCartByUserId(userId);
     }
 
@@ -74,8 +80,12 @@ public class CartServiceImpl implements CartService {
         }
 
         if (request.getQuantity() > 0) {
-            if (item.getProducts().getStock() < request.getQuantity()) {
-                throw new RuntimeException("Không đủ số lượng kho");
+            // Kiểm tra số lượng mới không vượt tồn kho
+            if (request.getQuantity() > item.getProducts().getStock()) {
+                throw new RuntimeException(
+                        String.format("Số lượng không đủ trong kho. Chỉ còn %d sản phẩm",
+                                item.getProducts().getStock())
+                );
             }
             item.setQuantity(request.getQuantity());
         }
@@ -91,6 +101,13 @@ public class CartServiceImpl implements CartService {
         }
 
         return getCartByUserId(userId);
+    }
+
+    @Override
+    public CartResponseDto getCartByUserId(Long userId) {
+        Cart cart = getOrCreateCart(userId);
+        Cart cartWithItems = cartRepository.findByUserIdWithItems(userId).orElse(cart);
+        return cartMapper.toCartResponseDto(cartWithItems);
     }
 
     @Override
