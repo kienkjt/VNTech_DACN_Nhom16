@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,7 @@ public class OrderServiceImpl implements OrderService {
     private final AddressRepository addressRepository;
     private final OrderMapper orderMapper;
     private final PaymentRepository paymentRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional
@@ -55,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setAddress(address);
         order.setStatus(OrderStatus.PENDING);
+        order.setPaymentMethod(paymentMethod);
         order.setNote(request.getNote());
 
         // Convert CartItem -> OrderItem
@@ -92,16 +96,21 @@ public class OrderServiceImpl implements OrderService {
         orderItems.forEach(i -> i.setOrders(savedOrder));
         orderItemRepository.saveAll(orderItems);
 
+        // Tạo Payment
         Payment payment = new Payment();
         payment.setOrders(savedOrder);
         payment.setAmount(savedOrder.getFinalPrice());
         payment.setPaymentMethod(paymentMethod);
+        payment.setTransactionId("TEMP_" + System.currentTimeMillis());
 
         if (paymentMethod == PaymentMethod.COD) {
             payment.setStatus(PaymentStatus.PENDING);
             payment.setNote("Thanh toán khi nhận hàng");
 
-            savedOrder.changeStatus(OrderStatus.CONFIRMED);
+            // Xử lý đơn COD: tự động xác nhận
+            savedOrder.setStatus(OrderStatus.CONFIRMED);
+            savedOrder.setConfirmedAt(LocalDateTime.now());
+            savedOrder.setUpdatedAt(LocalDateTime.now());
             orderRepository.save(savedOrder);
 
         } else if (paymentMethod == PaymentMethod.VNPAY) {
@@ -111,11 +120,108 @@ public class OrderServiceImpl implements OrderService {
 
         paymentRepository.save(payment);
 
+        // Xóa giỏ hàng
         cartItemRepository.deleteAllByCart(cart);
 
         return orderMapper.toOrderResponseDto(savedOrder);
     }
+    @Override
+    @Transactional
+    public OrderResponseDto buyNow(Long userId, BuyNowRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
 
+        Address address = addressRepository.findById(request.getAddressId())
+                .orElseThrow(() -> new IllegalArgumentException("Địa chỉ không tồn tại"));
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
+
+        if (request.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+        }
+
+        if (product.getStock() < request.getQuantity()) {
+            throw new IllegalArgumentException(
+                    String.format("Số lượng không đủ trong kho. Chỉ còn %d sản phẩm", product.getStock())
+            );
+        }
+
+        // Convert payment method
+        PaymentMethod paymentMethod = PaymentMethod.fromString(request.getPaymentMethod());
+
+        // Tạo Order
+        Order order = new Order();
+        order.setUser(user);
+        order.setAddress(address);
+        order.setStatus(OrderStatus.PENDING);
+        order.setPaymentMethod(paymentMethod);
+        order.setNote(request.getNote());
+
+        // Tạo OrderItem từ sản phẩm
+        OrderItem orderItem = new OrderItem();
+        orderItem.setProducts(product);
+        orderItem.setQuantity(request.getQuantity());
+        orderItem.setPrice(product.getSalePrice().intValue());
+        orderItem.setOrders(order);
+
+        List<OrderItem> orderItems = Collections.singletonList(orderItem);
+
+        // Tính tổng tiền
+        int total = orderItem.getPrice() * orderItem.getQuantity();
+        order.setTotalPrice(total);
+
+        int shippingFee = 30000;
+        order.setShippingFee(shippingFee);
+
+        int discount = 0;
+        if ("DISCOUNT10".equalsIgnoreCase(request.getCouponCode())) {
+            discount = (int) (total * 0.1);
+        }
+        order.setDiscount(discount);
+
+        // Tính finalPrice
+        order.calculateFinalPrice();
+
+        // Lưu Order
+        Order savedOrder = orderRepository.save(order);
+
+        // Lưu OrderItem
+        orderItem.setOrders(savedOrder);
+        orderItemRepository.save(orderItem);
+
+        // Tạo Payment
+        Payment payment = new Payment();
+        payment.setOrders(savedOrder);
+        payment.setAmount(savedOrder.getFinalPrice());
+        payment.setPaymentMethod(paymentMethod);
+        payment.setTransactionId("TEMP_" + System.currentTimeMillis());
+
+        if (paymentMethod == PaymentMethod.COD) {
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setNote("Thanh toán khi nhận hàng");
+            payment.setPaidAt(null);
+
+            // Xử lý đơn COD: tự động xác nhận
+            savedOrder.setStatus(OrderStatus.CONFIRMED);
+            savedOrder.setConfirmedAt(LocalDateTime.now());
+            savedOrder.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(savedOrder);
+
+        } else if (paymentMethod == PaymentMethod.VNPAY) {
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setNote("Chờ thanh toán qua VNPay");
+            payment.setPaidAt(null);
+        }
+
+        paymentRepository.save(payment);
+
+        // Giảm số lượng tồn kho
+        product.setStock(product.getStock() - request.getQuantity());
+        productRepository.save(product);
+
+        return orderMapper.toOrderResponseDto(savedOrder);
+    }
 
     @Override
     public OrderResponseDto getOrderById(Long orderId, Long userId) {
@@ -178,6 +284,13 @@ public class OrderServiceImpl implements OrderService {
         order.changeStatus(OrderStatus.CANCELLED);
         order.setCancelReason(cancelReason);
         Order saved = orderRepository.save(order);
+
+        // Cập nhật trạng thái thanh toán nếu có
+        paymentRepository.findByOrdersId(orderId).ifPresent(payment -> {
+            payment.setStatus(PaymentStatus.CANCELLED);
+            paymentRepository.save(payment);
+        });
+
         return orderMapper.toOrderResponseDto(saved);
     }
 
@@ -232,13 +345,18 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin thanh toán"));
 
             payment.setStatus(status);
+            if (status == PaymentStatus.PAID) {
+                payment.setPaidAt(LocalDateTime.now());
+            }
             paymentRepository.save(payment);
 
             if (status == PaymentStatus.PAID) {
                 Order order = orderRepository.findById(orderId)
                         .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
-                order.changeStatus(OrderStatus.CONFIRMED);
-                orderRepository.save(order);
+                if (order.getStatus() == OrderStatus.PENDING) {
+                    order.changeStatus(OrderStatus.CONFIRMED);
+                    orderRepository.save(order);
+                }
             }
 
         } catch (Exception e) {

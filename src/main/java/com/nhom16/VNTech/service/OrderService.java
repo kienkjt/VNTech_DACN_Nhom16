@@ -11,6 +11,7 @@ import java.util.List;
 public interface OrderService {
 
     OrderResponseDto createOrder(Long userId, OrderRequestDto request);
+    OrderResponseDto buyNow(Long userId, BuyNowRequestDto request);
     OrderResponseDto getOrderById(Long orderId, Long userId);
     OrderResponseDto getOrderByCode(String orderCode, Long userId);
     List<OrderSummaryDto> getOrdersByUserId(Long userId);

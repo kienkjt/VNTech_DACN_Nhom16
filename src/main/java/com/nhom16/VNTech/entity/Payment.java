@@ -34,7 +34,7 @@ public class Payment {
     @Column(name = "transaction_id")
     private String transactionId;
 
-    @Column(name = "payment_url")
+    @Column(name = "payment_url", length = 2000)
     private String paymentUrl;
 
     @Column(name = "bank_code")

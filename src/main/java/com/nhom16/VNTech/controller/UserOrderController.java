@@ -1,6 +1,7 @@
 package com.nhom16.VNTech.controller;
 
 import com.nhom16.VNTech.dto.APIResponse;
+import com.nhom16.VNTech.dto.order.BuyNowRequestDto;
 import com.nhom16.VNTech.dto.order.OrderRequestDto;
 import com.nhom16.VNTech.dto.order.OrderResponseDto;
 import com.nhom16.VNTech.dto.order.OrderSummaryDto;
@@ -9,10 +10,14 @@ import com.nhom16.VNTech.service.UserService;
 import com.nhom16.VNTech.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,7 +57,7 @@ public class UserOrderController {
         return userOpt.orElseThrow(() -> new RuntimeException("Người dùng không tồn tại")).getId();
     }
 
-    @PostMapping
+    @PostMapping("")
     @Operation(summary = "Tạo đơn hàng mới cho user đang đăng nhập")
     public ResponseEntity<APIResponse<OrderResponseDto>> createOrder(
             @RequestBody OrderRequestDto request,
@@ -60,6 +65,30 @@ public class UserOrderController {
         Long userId = extractUserIdFromRequest(httpRequest);
         OrderResponseDto created = orderService.createOrder(userId, request);
         return ResponseEntity.ok(APIResponse.success(created, "Tạo đơn hàng thành công"));
+    }
+    @PostMapping("/buy-now")
+    public ResponseEntity<APIResponse<OrderResponseDto>> buyNow(
+            @RequestBody @Valid BuyNowRequestDto request,
+            HttpServletRequest httpRequest) {
+        try {
+            Long userId = extractUserIdFromRequest(httpRequest);
+
+            OrderResponseDto order = orderService.buyNow(userId, request);
+
+            return ResponseEntity.ok(
+                    APIResponse.success(order, "Tạo đơn hàng mua ngay thành công")
+            );
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    APIResponse.error(e.getMessage())
+            );
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    APIResponse.error("Lỗi hệ thống: " + e.getMessage())
+            );
+        }
     }
 
     @GetMapping("/{orderId}")
