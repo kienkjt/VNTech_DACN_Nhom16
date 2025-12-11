@@ -74,53 +74,26 @@ public class PaymentController {
         }
     }
     // Xử lý kết quả thanh toán từ VNPAY
-    @GetMapping("/vnpay-return")
-    public ResponseEntity<?> paymentReturn(HttpServletRequest request) {
-        try {
-            PaymentResultDto result = paymentService.processPaymentResult(request);
-
-            boolean isSuccess = "00".equals(result.getRspCode());
-
-            if (isSuccess) {
-                // Cập nhật trạng thái thanh toán
-                orderService.updateOrderPaymentStatus(result.getOrderId(), "PAID");
-            }
-
-            return ResponseEntity.ok(
-                    new APIResponse<>(isSuccess, result.getMessage(), result)
-            );
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    APIResponse.error("Lỗi xử lý kết quả thanh toán: " + e.getMessage())
-            );
-        }
+    @PostMapping("/vnpay/ipn")
+    public ResponseEntity<PaymentResultDto> vnpayIpnCallback(HttpServletRequest request) {
+        PaymentResultDto result = paymentService.processIpnCallback(request);
+        return ResponseEntity.ok(result);
     }
-    // Xử lý IPN từ VNPAY
-    @GetMapping("/vnpay-ipn")
-    public ResponseEntity<?> paymentIPN(HttpServletRequest request) {
-        try {
-            PaymentResultDto result = paymentService.processPaymentResult(request);
 
-            if ("00".equals(result.getRspCode())) {
-                log.info("IPN: Payment successful for order: {}", result.getOrderId());
-            } else {
-                log.warn("IPN: Payment failed for order: {}", result.getOrderId());
-            }
+    @GetMapping("/vnpay-return")
+    public ResponseEntity<String> vnpayReturn(HttpServletRequest request) {
+        PaymentResultDto result = paymentService.processPaymentResult(request);
 
-            // VNPAY yêu cầu format này
-            return ResponseEntity.ok(Map.of(
-                    "RspCode", "00",
-                    "Message", "Confirm Success"
-            ));
+        // Redirect về frontend với thông tin kết quả
+        String redirectUrl = String.format(
+                "http://your-frontend-url.com/payment/result?status=%s&message=%s&orderId=%s",
+                result.getRspCode(),
+                result.getMessage(),
+                result.getOrderId()
+        );
 
-        } catch (Exception e) {
-            log.error("IPN processing error: ", e);
-
-            return ResponseEntity.ok(Map.of(
-                    "RspCode", "99",
-                    "Message", "Unknown error"
-            ));
-        }
+        return ResponseEntity.status(302)
+                .header("Location", redirectUrl)
+                .build();
     }
 }

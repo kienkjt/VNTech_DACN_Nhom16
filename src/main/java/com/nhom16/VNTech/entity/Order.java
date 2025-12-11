@@ -1,7 +1,7 @@
 package com.nhom16.VNTech.entity;
 
 import com.nhom16.VNTech.enums.OrderStatus;
-import com.nhom16.VNTech.enums.PaymentMethod; // Thêm import
+import com.nhom16.VNTech.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -72,6 +72,9 @@ public class Order {
         if (paymentMethod == null) {
             paymentMethod = PaymentMethod.COD;
         }
+        if (status == null) {
+            status = OrderStatus.PENDING; // Mặc định là PENDING
+        }
     }
 
     @PreUpdate
@@ -122,5 +125,10 @@ public class Order {
 
     public boolean isCodPayment() {
         return this.paymentMethod == PaymentMethod.COD;
+    }
+
+    public void setStatusDirectly(OrderStatus newStatus) {
+        this.status = newStatus;
+        updateTimestamps();
     }
 }
