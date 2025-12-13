@@ -24,8 +24,8 @@ public class WebSecurityConfig {
     private final AuthEntryPointJwt unauthorizedHandler;
 
     public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
-                             JwtAuthenticationFilter jwtFilter,
-                             AuthEntryPointJwt unauthorizedHandler) {
+            JwtAuthenticationFilter jwtFilter,
+            AuthEntryPointJwt unauthorizedHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
         this.unauthorizedHandler = unauthorizedHandler;
@@ -60,6 +60,7 @@ public class WebSecurityConfig {
                                 "/products/**",
                                 "/categories/**",
                                 "/cart/**",
+                                "/pc-builds/**",
                                 "/payment-methods",
                                 "/user/payment/vnpay-return",
                                 "/user/payment/vnpay/ipn",
@@ -67,12 +68,11 @@ public class WebSecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
-                        ).permitAll()
+                                "/api-docs/**")
+                        .permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
