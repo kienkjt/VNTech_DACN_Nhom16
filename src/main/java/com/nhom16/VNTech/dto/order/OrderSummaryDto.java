@@ -1,5 +1,6 @@
 package com.nhom16.VNTech.dto.order;
 
+import com.nhom16.VNTech.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 public class OrderSummaryDto {
     private Long orderId;
     private String orderCode;
-    private String status;
+    private OrderStatus status;
     private int finalPrice;
     private LocalDateTime createdAt;
     private String recipientName;

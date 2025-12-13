@@ -64,7 +64,8 @@ public class OrderMapper {
         OrderSummaryDto dto = new OrderSummaryDto();
         dto.setOrderId(order.getId());
         dto.setOrderCode(order.getOrderCode());
-        dto.setStatus(order.getStatus() != null ? order.getStatus().getName() : null);
+//        dto.setStatus(order.getStatus() != null ? order.getStatus().getName() : null);
+        dto.setStatus(order.getStatus());
         dto.setFinalPrice(order.getFinalPrice());
         dto.setCreatedAt(order.getCreatedAt());
 
