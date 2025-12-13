@@ -1,5 +1,8 @@
 package com.nhom16.VNTech.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PaymentStatus {
     PENDING("PENDING", "Chờ thanh toán"),
     PAID("PAID", "Đã thanh toán"),
@@ -13,14 +16,6 @@ public enum PaymentStatus {
     PaymentStatus(String code, String description) {
         this.code = code;
         this.description = description;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public static PaymentStatus fromString(String text) {

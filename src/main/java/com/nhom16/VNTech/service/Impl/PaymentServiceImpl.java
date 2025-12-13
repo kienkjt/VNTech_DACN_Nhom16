@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class VnPayServiceImpl implements PaymentService {
+public class PaymentServiceImpl implements PaymentService {
 
     private final VnPayConfig vnPayConfig;
     private final OrderRepository orderRepository;
