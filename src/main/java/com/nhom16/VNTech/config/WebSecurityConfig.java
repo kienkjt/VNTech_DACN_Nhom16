@@ -65,6 +65,8 @@ public class WebSecurityConfig {
                                 "/user/payment/vnpay-return",
                                 "/user/payment/vnpay/ipn",
                                 "/address/**",
+                                "/shipping/**",
+                                "/coupons/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
