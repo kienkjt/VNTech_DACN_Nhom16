@@ -1,13 +1,17 @@
 package com.nhom16.VNTech.service.Impl;
 
+import com.nhom16.VNTech.dto.coupon.CouponValidationResponseDto;
 import com.nhom16.VNTech.dto.order.*;
+import com.nhom16.VNTech.dto.shipping.ShippingFeeResponseDto;
 import com.nhom16.VNTech.entity.*;
 import com.nhom16.VNTech.enums.OrderStatus;
 import com.nhom16.VNTech.enums.PaymentMethod;
 import com.nhom16.VNTech.enums.PaymentStatus;
 import com.nhom16.VNTech.mapper.OrderMapper;
 import com.nhom16.VNTech.repository.*;
+import com.nhom16.VNTech.service.CouponService;
 import com.nhom16.VNTech.service.OrderService;
+import com.nhom16.VNTech.service.ShippingFeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +37,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
+    private final ShippingFeeService shippingFeeService;
+//    private final CouponService couponService;
 
     @Override
     @Transactional
@@ -77,13 +83,26 @@ public class OrderServiceImpl implements OrderService {
                 .sum();
         order.setTotalPrice(total);
 
-        int shippingFee = 30000;
+        // Tính phí ship động
+        ShippingFeeResponseDto shippingFeeResponse = shippingFeeService.calculateShippingFee(
+                address.getProvince(),
+                total);
+        int shippingFee = shippingFeeResponse.getShippingFee();
         order.setShippingFee(shippingFee);
 
+        // Xử lý mã giảm giá
         int discount = 0;
-        if ("DISCOUNT10".equalsIgnoreCase(request.getCouponCode())) {
-            discount = (int) (total * 0.1);
-        }
+//        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
+//            CouponValidationResponseDto couponValidation = couponService.validateAndCalculateDiscount(
+//                    request.getCouponCode(),
+//                    userId,
+//                    total,
+//                    shippingFee);
+//
+//            if (couponValidation.getIsValid()) {
+//                discount = couponValidation.getDiscountAmount();
+//            }
+//        }
         order.setDiscount(discount);
 
         // Tính finalPrice
@@ -120,11 +139,26 @@ public class OrderServiceImpl implements OrderService {
 
         paymentRepository.save(payment);
 
+        // Ghi nhận sử dụng coupon nếu có
+//        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty() && discount > 0) {
+//            try {
+//                couponService.applyCoupon(
+//                        request.getCouponCode(),
+//                        userId,
+//                        savedOrder.getId(),
+//                        discount);
+//            } catch (Exception e) {
+//                // Log error but don't fail the order
+//                System.err.println("Error applying coupon: " + e.getMessage());
+//            }
+//        }
+
         // Xóa giỏ hàng
         cartItemRepository.deleteAllByCart(cart);
 
         return orderMapper.toOrderResponseDto(savedOrder);
     }
+
     @Override
     @Transactional
     public OrderResponseDto buyNow(Long userId, BuyNowRequestDto request) {
@@ -143,8 +177,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (product.getStock() < request.getQuantity()) {
             throw new IllegalArgumentException(
-                    String.format("Số lượng không đủ trong kho. Chỉ còn %d sản phẩm", product.getStock())
-            );
+                    String.format("Số lượng không đủ trong kho. Chỉ còn %d sản phẩm", product.getStock()));
         }
 
         // Convert payment method
@@ -171,13 +204,26 @@ public class OrderServiceImpl implements OrderService {
         int total = orderItem.getPrice() * orderItem.getQuantity();
         order.setTotalPrice(total);
 
-        int shippingFee = 30000;
+        // Tính phí ship động
+        ShippingFeeResponseDto shippingFeeResponse = shippingFeeService.calculateShippingFee(
+                address.getProvince(),
+                total);
+        int shippingFee = shippingFeeResponse.getShippingFee();
         order.setShippingFee(shippingFee);
 
+        // Xử lý mã giảm giá
         int discount = 0;
-        if ("DISCOUNT10".equalsIgnoreCase(request.getCouponCode())) {
-            discount = (int) (total * 0.1);
-        }
+//        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
+//            CouponValidationResponseDto couponValidation = couponService.validateAndCalculateDiscount(
+//                    request.getCouponCode(),
+//                    userId,
+//                    total,
+//                    shippingFee);
+//
+//            if (couponValidation.getIsValid()) {
+//                discount = couponValidation.getDiscountAmount();
+//            }
+//        }
         order.setDiscount(discount);
 
         // Tính finalPrice
@@ -215,6 +261,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         paymentRepository.save(payment);
+
+        // Ghi nhận sử dụng coupon nếu có
+//        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty() && discount > 0) {
+//            try {
+//                couponService.applyCoupon(
+//                        request.getCouponCode(),
+//                        userId,
+//                        savedOrder.getId(),
+//                        discount);
+//            } catch (Exception e) {
+//                // Log error but don't fail the order
+//                System.err.println("Error applying coupon: " + e.getMessage());
+//            }
+//        }
 
         // Giảm số lượng tồn kho
         product.setStock(product.getStock() - request.getQuantity());
