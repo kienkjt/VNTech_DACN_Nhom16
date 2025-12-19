@@ -65,4 +65,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt BETWEEN :startDate AND :endDate")
     long countDeliveredOrdersByDateRange(@Param("startDate") LocalDateTime startDate,
                                          @Param("endDate") LocalDateTime endDate);
+
+    // Tổng doanh thu (tùy chọn khoảng thời gian), loại trừ trạng thái CANCELLED
+    @Query("SELECT COALESCE(SUM(o.finalPrice), 0) FROM Order o WHERE (:startDate IS NULL OR o.createdAt >= :startDate) AND (:endDate IS NULL OR o.createdAt <= :endDate) AND o.status <> com.nhom16.VNTech.enums.OrderStatus.CANCELLED")
+    Long sumTotalRevenueBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Tổng số đơn hàng trong khoảng thời gian
+    @Query("SELECT COUNT(o) FROM Order o WHERE (:startDate IS NULL OR o.createdAt >= :startDate) AND (:endDate IS NULL OR o.createdAt <= :endDate)")
+    Long countOrdersBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Thống kê số đơn theo trạng thái
+    @Query("SELECT o.status, COUNT(o) FROM Order o WHERE (:startDate IS NULL OR o.createdAt >= :startDate) AND (:endDate IS NULL OR o.createdAt <= :endDate) GROUP BY o.status")
+    List<Object[]> countOrdersGroupedByStatus(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Doanh thu theo tháng trong năm
+    @Query("SELECT FUNCTION('MONTH', o.createdAt), COALESCE(SUM(o.finalPrice),0) FROM Order o WHERE FUNCTION('YEAR', o.createdAt) = :year AND o.status <> com.nhom16.VNTech.enums.OrderStatus.CANCELLED GROUP BY FUNCTION('MONTH', o.createdAt) ORDER BY FUNCTION('MONTH', o.createdAt)")
+    List<Object[]> findMonthlyRevenueByYear(@Param("year") int year);
 }
