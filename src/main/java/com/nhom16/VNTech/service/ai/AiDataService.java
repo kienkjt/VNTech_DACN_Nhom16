@@ -28,9 +28,9 @@ public class AiDataService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /**
-     * Lấy thông tin sản phẩm cho khách hàng
-     */
+
+     //Lấy thông tin sản phẩm cho khách hàng
+
     public Map<String, Object> getProductContext(Long userId) {
         Map<String, Object> context = new LinkedHashMap<>();
 
@@ -67,9 +67,9 @@ public class AiDataService {
         return context;
     }
 
-    /**
-     * Tìm sản phẩm theo từ khóa
-     */
+
+     //Tìm sản phẩm theo từ khóa
+
     public Map<String, Object> searchProducts(String keyword, Long userId) {
         Map<String, Object> context = new LinkedHashMap<>();
 
@@ -100,9 +100,9 @@ public class AiDataService {
         return context;
     }
 
-    /**
-     * Tìm sản phẩm theo khoảng giá
-     */
+
+     //Tìm sản phẩm theo khoảng giá
+
     public Map<String, Object> getProductsByPriceRange(Long minPrice, Long maxPrice) {
         Map<String, Object> context = new LinkedHashMap<>();
 
@@ -266,9 +266,7 @@ public class AiDataService {
         return context;
     }
 
-    /**
-     * Tổng hợp context đầy đủ cho AI
-     */
+
     public Map<String, Object> getCustomerFullContext(Long userId) {
         Map<String, Object> fullContext = new LinkedHashMap<>();
 
@@ -288,9 +286,7 @@ public class AiDataService {
         return fullContext;
     }
 
-    /**
-     * Context với search/filter
-     */
+
     public Map<String, Object> getCustomerContextWithSearch(Long userId, String searchQuery, Long categoryId, String brand, Long minPrice, Long maxPrice) {
         Map<String, Object> fullContext = getCustomerFullContext(userId);
 
@@ -314,9 +310,7 @@ public class AiDataService {
         return fullContext;
     }
 
-    /**
-     * Convert sang JSON cho AI
-     */
+
     public String getCustomerContextJson(Long userId) {
         try {
             Map<String, Object> context = getCustomerFullContext(userId);
@@ -327,9 +321,7 @@ public class AiDataService {
         }
     }
 
-    /**
-     * Context JSON với search
-     */
+
     public String getCustomerContextJsonWithSearch(Long userId, String searchQuery, Long categoryId, String brand, Long minPrice, Long maxPrice) {
         try {
             Map<String, Object> context = getCustomerContextWithSearch(userId, searchQuery, categoryId, brand, minPrice, maxPrice);
