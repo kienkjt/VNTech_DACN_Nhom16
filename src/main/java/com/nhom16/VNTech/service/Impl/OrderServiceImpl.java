@@ -77,6 +77,28 @@ public class OrderServiceImpl implements OrderService {
             return item;
         }).collect(Collectors.toList());
 
+        // --- KIỂM TRA TỒN KHO VÀ CẬP NHẬT STOCK (dùng pessimistic lock để tránh race) ---
+        for (CartItem ci : cart.getCartItems()) {
+            Product p = productRepository.findByIdForUpdate(ci.getProducts().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
+
+            if (ci.getQuantity() <= 0) {
+                throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+            }
+
+            if (p.getStock() < ci.getQuantity()) {
+                throw new IllegalArgumentException(
+                        String.format("Số lượng không đủ trong kho cho sản phẩm %s. Chỉ còn %d sản phẩm", p.getProductName(), p.getStock())
+                );
+            }
+
+            // Giảm stock và tăng quantitySold
+            p.setStock(p.getStock() - ci.getQuantity());
+            p.setQuantitySold(p.getQuantitySold() + ci.getQuantity());
+            productRepository.save(p);
+        }
+        // --- Kết thúc kiểm tra và cập nhật stock ---
+
         // Tính tổng tiền sản phẩm
         int total = orderItems.stream()
                 .mapToInt(oi -> oi.getPrice() * oi.getQuantity())
