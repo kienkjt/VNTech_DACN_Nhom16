@@ -67,6 +67,7 @@ public class WebSecurityConfig {
                                 "/address/**",
                                 "/shipping/**",
                                 "/coupons/**",
+                                "/copilot",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",

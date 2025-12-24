@@ -1,6 +1,7 @@
 package com.nhom16.VNTech.mapper;
 
 import com.nhom16.VNTech.dto.order.*;
+import com.nhom16.VNTech.dto.payment.PaymentResponseDto;
 import com.nhom16.VNTech.dto.product.ProductDto;
 import com.nhom16.VNTech.dto.user.UserOrderDto;
 import com.nhom16.VNTech.entity.Order;
@@ -47,6 +48,24 @@ public class OrderMapper {
         dto.setCanBeCancelled(order.canBeCancelled());
         dto.setUser(toUserOrderDto(order.getUser()));
         dto.setAddress(addressMapper.toDto(order.getAddress()));
+
+        // Map payment details
+        if (order.getPayment() != null) {
+            PaymentResponseDto payDto = new com.nhom16.VNTech.dto.payment.PaymentResponseDto();
+            payDto.setTransactionId(order.getPayment().getTransactionId());
+            payDto.setPaymentUrl(order.getPayment().getPaymentUrl());
+            payDto.setPaymentMethod(order.getPayment().getPaymentMethod());
+            payDto.setStatus(order.getPayment().getStatus());
+            payDto.setAmount(order.getPayment().getAmount());
+            payDto.setBankCode(order.getPayment().getBankCode());
+            payDto.setBankTransactionNo(order.getPayment().getBankTransactionNo());
+            payDto.setCardType(order.getPayment().getCardType());
+            payDto.setPayDate(order.getPayment().getPayDate());
+            payDto.setPaidAt(order.getPayment().getPaidAt());
+            dto.setPayment(payDto);
+        }
+
+        dto.setPaymentMethod(order.getPaymentMethod());
 
         if (order.getOrderItems() != null) {
             List<OrderItemDto> items = order.getOrderItems().stream()
