@@ -84,16 +84,25 @@ public class PaymentController {
     public ResponseEntity<String> vnpayReturn(HttpServletRequest request) {
         PaymentResultDto result = paymentService.processPaymentResult(request);
 
-        // Redirect về frontend với thông tin kết quả
-        String redirectUrl = String.format(
-                "http://your-frontend-url.com/payment/result?status=%s&message=%s&orderId=%s",
-                result.getRspCode(),
-                result.getMessage(),
-                result.getOrderId()
-        );
+        // Redirect về frontend
+        try {
+            String status = result.getRspCode() != null ? java.net.URLEncoder.encode(result.getRspCode(), java.nio.charset.StandardCharsets.UTF_8.toString()) : "";
+            String message = result.getMessage() != null ? java.net.URLEncoder.encode(result.getMessage(), java.nio.charset.StandardCharsets.UTF_8.toString()) : "";
+            String orderId = result.getOrderId() != null ? String.valueOf(result.getOrderId()) : "";
 
-        return ResponseEntity.status(302)
-                .header("Location", redirectUrl)
-                .build();
+            String redirectUrl = String.format(
+                    "http://localhost:3000/payment/result?status=%s&message=%s&orderId=%s",
+                    status,
+                    message,
+                    orderId
+            );
+
+            return ResponseEntity.status(302)
+                    .header("Location", redirectUrl)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error building redirect URL", e);
+            return ResponseEntity.status(500).body("Lỗi tạo redirect URL");
+        }
     }
 }
